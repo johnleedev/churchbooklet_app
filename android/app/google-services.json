@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "570674717771",
+    "project_id": "churchbooklet-8d82b",
+    "storage_bucket": "churchbooklet-8d82b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:570674717771:android:10044d18064ac4e61719ce",
+        "android_client_info": {
+          "package_name": "com.churchbooklet.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "570674717771-c9al1c14ktlpen1mpesrq2ql3ufe1j2d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.churchbooklet.app",
+            "certificate_hash": "1160ba6d1ae154141003eb0c852c89717a0c757a"
+          }
+        },
+        {
+          "client_id": "570674717771-5s5p2d4eqo5avufvb6mpf8dklk7kk6ao.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJxX-b4rYM-2hqjZW4D39aJHA7ae3bUA8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "570674717771-5s5p2d4eqo5avufvb6mpf8dklk7kk6ao.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "570674717771-b1474726d570uiuqoccpaf8nkac9lpc4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.churchbooklet.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

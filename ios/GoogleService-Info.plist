@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyB7FL9721CZ42jg-ieCdWoaLM3j_bHuyIo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>570674717771</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.churchbooklet.app</string>
+	<key>PROJECT_ID</key>
+	<string>churchbooklet-8d82b</string>
+	<key>STORAGE_BUCKET</key>
+	<string>churchbooklet-8d82b.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:570674717771:ios:e91d8549c01c5ac91719ce</string>
+</dict>
+</plist>

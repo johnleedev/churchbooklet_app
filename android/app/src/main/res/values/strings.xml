@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">churchbooklet</string>
+    <string name="app_name">교회수첩</string>
+    <string moduleConfig="true" name="CodePushDeploymentKey">dzOYiwPyLWhpcqBhts8uhGdjt7IzIN9jscaTH</string>
+    <string name="kakao_app_key">f1b2ec248c2bee36797192655ed2e587</string>
 </resources>
