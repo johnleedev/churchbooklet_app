@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     padding: 24
   },
   backButton: {

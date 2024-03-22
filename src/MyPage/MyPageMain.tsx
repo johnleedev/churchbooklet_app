@@ -21,7 +21,6 @@ import { ButtonBox } from '../Components/ButtonBox';
 import Loading from '../Components/Loading';
 import SelectDropdown from 'react-native-select-dropdown'
 
-
 function MyPageMain (props: any) {
 
   const [isProfileModalVisible, setProfileModalVisible] = useState(false);
@@ -113,7 +112,7 @@ function MyPageMain (props: any) {
 
 
   // 직분 선택
-  const optionsDuty = ["성도", "주일학교", "집사", "안수집사", "권사", "장로", "목회자"];
+  const optionsDuty = ["성도", "주일학교", "집사", "안수집사", "권사", "장로", "선교사", "전도사", "목사"];
 
   // 사진 변경 함수 ----------------------------------------------------------------   
   const alertChangePhoto = () => {

@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
-import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { Typography } from "../Components/Typography";
 import AsyncGetItem from '../AsyncGetItem'
+import { useResetRecoilState } from "recoil";
+import { recoilLoginData } from "../RecoilStore";
 
 export default function Result (props : any) {
+
+  const resetUserLoginData = useResetRecoilState(recoilLoginData);
 
   // AsyncGetData
   const [asyncGetData, setAsyncGetData] = useState<any>({});
@@ -18,50 +21,42 @@ export default function Result (props : any) {
   };
 
   useEffect(() => {
+    resetUserLoginData();
     asyncFetchData();
   }, []);
 
   return (
-    <View style={Platform.OS === 'android' ? styles.android : styles.ios}>
-      <View style={styles.container}>
-        <View  style={{width: '100%', height:100, alignItems: 'flex-start', marginTop:50}}>
-          <Image source={require('../images/login/icon.png')} 
-              style={{width: 100, height:100, resizeMode: 'contain'}}/>
-        </View>
-        <View style={{flex:1, width:'100%', justifyContent: 'flex-start', marginTop:50}}>
-          <Typography fontSize={28} marginBottom={5}>{asyncGetData.userName}님</Typography>
-          <Typography fontSize={28} marginBottom={20}>회원가입이 완료되었어요!</Typography>
-          <Typography fontSize={14} fontWeightIdx={1}>"교회수첩 어플"의 다양한 컨텐츠에 참여해보세요.</Typography>
-        </View>
-        
-        <View style={{justifyContent: 'center', alignItems:'center'}}>
-          <TouchableOpacity 
-              onPress={()=>{
-                props.navigation.replace('Navi_Main');
-              }}
-              style={styles.nextBtnBox}
-              >
-              <Text style={styles.nextBtnText}>시작하기</Text>
-          </TouchableOpacity>
-        </View>
+    
+    <View style={styles.container}>
+      <View  style={{width: '100%', height:100, alignItems: 'flex-start', marginTop:50}}>
+        <Image source={require('../images/login/icon.png')} 
+            style={{width: 100, height:100, resizeMode: 'contain'}}/>
+      </View>
+      <View style={{flex:1, width:'100%', justifyContent: 'flex-start', marginTop:50}}>
+        <Typography fontSize={28} marginBottom={5}>{asyncGetData.userName}님</Typography>
+        <Typography fontSize={28} marginBottom={20}>회원가입이 완료되었어요!</Typography>
+        <Typography fontWeightIdx={1} marginBottom={5}>"교회수첩" 어플의</Typography>
+        <Typography fontWeightIdx={1}>다양한 컨텐츠에 참여해보세요.</Typography>
+      </View>
+      
+      <View style={{justifyContent: 'center', alignItems:'center'}}>
+        <TouchableOpacity 
+            onPress={()=>{
+              props.navigation.replace('Navi_Main');
+            }}
+            style={styles.nextBtnBox}
+            >
+            <Text style={styles.nextBtnText}>시작하기</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  android: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  ios : {
-    flex: 1,
-    backgroundColor: 'black',
-    paddingTop: getStatusBarHeight(),
-  },
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     padding: 24
   },
   mainlogo: {

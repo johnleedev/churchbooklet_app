@@ -1,12 +1,11 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import ChurchMain from "./Church/ChurchMain";
-import ChurchInfoInput from "./Church/ChurchInfoInput";
-import ChurchSearch from "./Church/ChurchSearch";
-import ChurchSearchDetail from "./Church/ChurchSearchDetail";
 import ChurchNoticeDetail from "./Church/ChurchNoticeDetail";
 import ChurchNoticePost from "./Church/ChurchNoticePost";
 import ChurchImageRevise from "./Church/ChurchImageRevise";
+import ChurchInfoInput from "./Church/ChurchInfoInput";
+import Notice from "./Church/Notice";
 
 const Stack = createNativeStackNavigator();
 
@@ -16,12 +15,11 @@ function Navi_Church() {
       screenOptions={{headerShown: false}}
      >
       <Stack.Screen name={'ChurchMain'} component={ChurchMain}/>
+      <Stack.Screen name={'Notice'} component={Notice}/>
       <Stack.Screen name={'ChurchNoticeDetail'} component={ChurchNoticeDetail}/>
       <Stack.Screen name={'ChurchNoticePost'} component={ChurchNoticePost}/>
-      <Stack.Screen name={'ChurchSearch'} component={ChurchSearch}/>
-      <Stack.Screen name={'ChurchSearchDetail'} component={ChurchSearchDetail}/>
-      <Stack.Screen name={'ChurchInfoInput'} component={ChurchInfoInput}/>
       <Stack.Screen name={'ChurchImageRevise'} component={ChurchImageRevise}/>
+      <Stack.Screen name={'ChurchInfoInput'} component={ChurchInfoInput}/>
     </Stack.Navigator>
   );
 }

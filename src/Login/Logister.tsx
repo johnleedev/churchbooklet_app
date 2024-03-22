@@ -1,35 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, ScrollView, Image, Platform, Alert, KeyboardAvoidingView } from 'react-native';
-import { getStatusBarHeight } from "react-native-status-bar-height";
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { Typography } from '../Components/Typography';
 import { Divider } from '../Components/Divider';
+import { useRecoilState } from 'recoil';
+import { recoilLoginData } from '../RecoilStore';
 
 function Logister (props : any) {
 
-  const routeDataSet = () => {
-    if(props.route.params === null || props.route.params === undefined) {
-      return
-    } else {
-      const routeData = props.route.params.data;
-      setRouteDataCopy(routeData);
-      setUserAccount(routeData.email);
-      setUserURL(routeData.userURL);
-      {
-        routeData.name && setUserName(routeData.name);
-      }
-    }
-  }
+  const [userLoginData, setUserLoginData] = useRecoilState(recoilLoginData);
 
-  useEffect(()=>{
-    routeDataSet();
-  }, [])
-
-  const [routeDataCopy, setRouteDataCopy] = useState({});
-  const [userAccount, setUserAccount] = useState('');
-  const [userName, setUserName] = useState('');
-  const [userURL, setUserURL] = useState('');
-
+  const [userAccount, setUserAccount] = useState(userLoginData.userAccount);
+  const [userName, setUserName] = useState(userLoginData.userName ? userLoginData.userName : '');
+  
   const [userAccountMessage, setUserAccountMessage] = useState('');
   const [isUserAccount, setIsUserAccount] = useState(false);
   const [userNameMessage, setUserNameMessage] = useState('');0
@@ -64,133 +47,121 @@ function Logister (props : any) {
 
   // Logister 페이지로 전환
   const goLogister2Page = () => {
-    const updatedData = { ...routeDataCopy, email: userAccount, name: userName };
-    userAccount && userName 
-    ?
-    props.navigation.replace('Logister2', { data: updatedData }) 
-    : 
-    Alert.alert('모든 항목을 채워주세요')
+    const copy = {...userLoginData}
+    copy.userName = userName;
+    setUserLoginData(copy);
+    props.navigation.navigate('Logister2');
   };
 
 
   return (
-    <View style={Platform.OS === 'android' ? styles.android : styles.ios}>
-      <View style={{flex:1, backgroundColor:'#fff'}}>
+    
+    <View style={{flex:1, backgroundColor:'#fff'}}>
 
-        <View style={{padding:20, alignItems: 'center', marginTop: 10, justifyContent: 'center'}}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={()=>{
-              props.navigation.goBack();
-            }}
-            >
-            <EvilIcons name="arrow-left" size={30} color="black" />
-          </TouchableOpacity>
-          <Typography>회원가입</Typography>
-        </View>
-
-        <Divider/>
-
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 50}
-          style={{flex:1}}
-        >
-
-        <ScrollView style={styles.container}>
-          
-          <View style={{flex:1, marginBottom:20}}>
-            <View style={{flexDirection:'row'}}>
-              <View style={{width:40, height:50, alignItems: 'center', marginBottom:10}}>
-                <Typography fontSize={24} fontWeightIdx={1}>01</Typography>  
-              </View>
-              <View style={{marginHorizontal:10}}>
-                <View style={{width:40, height:15}}></View>
-                <View style={{width:40, height:2, backgroundColor: '#ccc'}}></View>
-              </View>
-              <View style={{width:40, height:50, alignItems: 'center'}}>
-                <Typography fontSize={24} fontWeightIdx={1} color='#ccc'>02</Typography>  
-              </View>
-            </View>
-            <Typography fontSize={22} fontWeightIdx={1}>
-              회원정보 확인을 위해{'\n'}
-              기본정보를 입력해 주세요.
-            </Typography>
-          </View>
-          
-          <View style={{flex:2}}>
-            <Typography color='#8C8C8C' fontWeightIdx={1}>이메일 주소 <Typography color='#E94A4A'>*</Typography></Typography>
-            <View style={{flexDirection:'row'}}>
-              <View style={{width:21, height:40, justifyContent:'flex-end'}}>
-                { userURL === 'kakao' && <Image source={require('../images/login/kakao.png')} style={{width:20, height:20}}/>}
-                { userURL === 'naver' && <Image source={require('../images/login/naver.png')} style={{width:20, height:20}}/>}
-                { userURL === 'apple' && <Image source={require('../images/login/apple.png')} style={{width:20, height:20}}/>}
-                { userURL === 'google' 
-                  && <View style={{alignItems: 'center', justifyContent: 'center', width: 20, height: 20,
-                        marginHorizontal: 5, borderRadius:28, borderWidth:1, borderColor: '#BDBDBD'}} >
-                    <Image source={require('../images/login/google.png')} 
-                        style={{width: '40%', height: '40%', resizeMode:'center'}}/>
-                    </View>}
-              </View>
-              <TextInput
-                style={[styles.input, {width: '94%'}]}
-                placeholder="e-mail"
-                placeholderTextColor='#5D5D5D'
-                onChangeText={onChangeUserAccount}
-                value={userAccount}
-              />
-            </View>
-            {userAccount.length > 0 && (
-              <Text style={[styles.message, isUserAccount ? styles.success : styles.error]}>
-                {userAccountMessage}
-              </Text>
-            )}
-
-            <Typography color='#8C8C8C' fontWeightIdx={1}>이름 <Typography color='#E94A4A'>*</Typography></Typography>
-            <TextInput
-              style={[styles.input, {width: '100%'}]}
-              placeholder="이름"
-              placeholderTextColor='#5D5D5D'
-              onChangeText={onChangeUserName}
-              value={userName}
-            />
-            {userName.length > 0 && (
-              <Text style={[styles.message, isUserName ? styles.success : styles.error]}>
-                {userNameMessage}
-              </Text>
-            )}
-          </View>
-
-        </ScrollView>
-        </KeyboardAvoidingView>
-        
-        <View style={{padding:20}}>
-          <TouchableOpacity 
-            onPress={goLogister2Page}
-            style={
-              userAccount && userName ? [styles.nextBtnBox, { backgroundColor: 'black'}] 
-              : [styles.nextBtnBox, { backgroundColor: 'gray'}]
-            }
-            >
-            <Text style={styles.nextBtnText}>다음</Text>
-          </TouchableOpacity>
-        </View>
-        
+      <View style={{padding:20, alignItems: 'center', marginTop: 10, justifyContent: 'center'}}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={()=>{
+            props.navigation.goBack();
+          }}
+          >
+          <EvilIcons name="arrow-left" size={30} color="black" />
+        </TouchableOpacity>
+        <Typography fontSize={20}>회원가입</Typography>
       </View>
+
+      <Divider/>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 50}
+        style={{flex:1}}
+      >
+
+      <ScrollView style={styles.container}>
+        
+        <View style={{flex:1, marginBottom:30}}>
+          <View style={{flexDirection:'row', marginBottom:10}}>
+            <Typography fontSize={18} fontWeightIdx={1} marginBottom={10}>STEP. </Typography>
+            <Typography fontSize={18} fontWeightIdx={1} marginBottom={10}>1</Typography>
+            <View style={{width:20, height:2, backgroundColor:'#ccc', marginVertical:14, marginHorizontal:5}}></View>
+            <Typography fontSize={18} fontWeightIdx={1} marginBottom={10} color='#ccc'>2</Typography>  
+            <View style={{width:20, height:2, backgroundColor:'#ccc', marginVertical:14, marginHorizontal:5}}></View>
+            <Typography fontSize={18} fontWeightIdx={1} marginBottom={10} color='#ccc'>3</Typography>  
+          </View>
+          <Typography fontSize={22} fontWeightIdx={1}>
+            회원정보 확인을 위해{'\n'}
+            기본정보를 입력해 주세요.
+          </Typography>
+        </View>
+        
+        <View style={{flex:2}}>
+          <Typography color='#8C8C8C' fontWeightIdx={1} fontSize={18}>이메일 주소 <Typography color='#E94A4A'>*</Typography></Typography>
+          <View style={{flexDirection:'row', alignItems:'center'}}>
+            <View style={{width:21, height:50, justifyContent:'center'}}>
+              { userLoginData.userURL === 'kakao' && <Image source={require('../images/login/kakao.png')} style={{width:20, height:20}}/>}
+              { userLoginData.userURL === 'naver' && <Image source={require('../images/login/naver.png')} style={{width:20, height:20}}/>}
+              { userLoginData.userURL === 'apple' && <Image source={require('../images/login/apple.png')} style={{width:20, height:20}}/>}
+              { userLoginData.userURL === 'google' 
+                && <View style={{alignItems: 'center', justifyContent: 'center', width: 20, height: 20,
+                      marginHorizontal: 5, borderRadius:28, borderWidth:1, borderColor: '#BDBDBD'}} >
+                  <Image source={require('../images/login/google.png')} 
+                      style={{width: '40%', height: '40%', resizeMode:'center'}}/>
+                  </View>}
+            </View>
+            <TextInput
+              style={[styles.input, {width: '94%'}]}
+              placeholder="e-mail"
+              placeholderTextColor='#5D5D5D'
+              onChangeText={onChangeUserAccount}
+              value={userAccount}
+            />
+          </View>
+          {userAccount.length > 0 && (
+            <Text style={[styles.message, isUserAccount ? styles.success : styles.error]}>
+              {userAccountMessage}
+            </Text>
+          )}
+
+          <Typography color='#8C8C8C' fontWeightIdx={1} fontSize={18}>이름 <Typography color='#E94A4A'>*</Typography></Typography>
+          <TextInput
+            style={[styles.input, {width: '100%'}]}
+            placeholder="이름"
+            placeholderTextColor='#5D5D5D'
+            onChangeText={onChangeUserName}
+            value={userName}
+          />
+          {userName.length > 0 && (
+            <Text style={[styles.message, isUserName ? styles.success : styles.error]}>
+              {userNameMessage}
+            </Text>
+          )}
+        </View>
+
+      </ScrollView>
+      </KeyboardAvoidingView>
+      
+      <View style={{padding:20}}>
+        <TouchableOpacity 
+          onPress={()=>{
+            userAccount && userName 
+            ? goLogister2Page()
+            : Alert.alert('모든 항목을 채워주세요')
+          }}
+          style={
+            userAccount && userName ? [styles.nextBtnBox, { backgroundColor: '#333'}] 
+            : [styles.nextBtnBox, { backgroundColor: '#BDBDBD'}]
+          }
+          >
+          <Text style={styles.nextBtnText}>다음</Text>
+        </TouchableOpacity>
+      </View>
+      
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  android: {
-    flex: 1,
-    backgroundColor: '#333',
-  },
-  ios : {
-    flex: 1,
-    backgroundColor: '#333',
-    paddingTop: getStatusBarHeight(),
-  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -207,13 +178,14 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   input: {
-    height: 40,
+    height: 50,
     borderColor: '#DFDFDF',
     borderBottomWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
     marginVertical: 10,
     borderRadius: 5,
+    fontSize:18,
     color: '#333'
   },  
   message: {

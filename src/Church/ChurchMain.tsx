@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, ScrollView, Alert, TouchableOpacity,
-          NativeSyntheticEvent, TextInputChangeEventData, ImageBackground, Image } from 'react-native';
+import { StyleSheet, View, TextInput, ScrollView, Alert, TouchableOpacity, Linking,
+          NativeSyntheticEvent, TextInputChangeEventData, ImageBackground, Image, Text } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import AsyncGetItem from '../AsyncGetItem'
 import axios from 'axios';
@@ -12,14 +12,37 @@ import { Divider } from '../Components/Divider';
 import Loading from '../Components/Loading';
 import MainImageURL from "../../MainImageURL";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SelectScreen from './SelectScreen';
+
+interface ChurchsProps {
+  id: number;
+  userAccount : string;
+  churchName : string;
+  religiousbody : string;
+  churchAddressCity: string;
+  churchAddressCounty: string;
+  churchAddressRest: string;
+  churchPhone: string;
+  churchPastor: string;
+  churchImage : string;
+}
+
+interface ChurchNoticeProps {
+  id: number;
+  title: string;
+  content : string;
+  date: string;
+}
 
 const TextBox = ({ name, text }: { name: string; text: any }) => (
   <View style={{flexDirection:'row', alignItems:'center', paddingHorizontal:20, marginVertical:10}}>
-    <View style={{width:80, alignItems:'center'}}>
+    <View style={{width:'20%', alignItems:'center'}}>
       <Typography color='#8C8C8C'>{name}</Typography>
     </View>
     <View style={{width:2, height:20, backgroundColor:'#EAEAEA', marginHorizontal:10}}></View>
-    <Typography>{text}</Typography>
+    <View style={{width:'70%', flexDirection:'row', flexWrap:'wrap'}}>
+      <Typography>{text}</Typography>
+    </View>
   </View>
 );
 
@@ -27,6 +50,14 @@ export default function ChurchMain(props : any) {
 
   // AsyncGetData
   const [asyncGetData, setAsyncGetData] = useState<any>({});
+  const [church, setChurch] = useState<ChurchsProps>();
+  const [churchNotice, setChurchNotice] = useState<ChurchNoticeProps[]>([]);
+  const [myAuthKey, setMyAuthKey] = useState(0);
+  const [isDeleteBtnShow, setIsDeleteBtnShow] = useState<boolean>(false);
+  const [isResdataFalse, setIsResdataFalse] = useState<boolean>(false);
+  const [isResdataFalse2, setIsResdataFalse2] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<boolean>(false);
+
   const asyncFetchData = async () => {
     try {
       const data = await AsyncGetItem();
@@ -34,6 +65,7 @@ export default function ChurchMain(props : any) {
       if (data?.userChurchKey) {
         fetchPosts(data?.userChurchKey);
         fetchChurchNotice(data?.userChurchKey);
+        CheckMyAuth(data?.userAccount);
       }
     } catch (error) {
       console.error(error);
@@ -42,40 +74,24 @@ export default function ChurchMain(props : any) {
 
   useEffect(() => {
     asyncFetchData();
-  }, []);
-
-  interface ChurchsProps {
-    id: number;
-    userAccount : string;
-    churchName : string;
-    religiousbody : string;
-    churchAddressCity: string;
-    churchAddressCounty: string;
-    churchAddressRest: string;
-    churchPhone: string;
-    churchPastor: string;
-    churchImage : string;
-  }
-
-  interface ChurchNoticeProps {
-    id: number;
-    title: string;
-    content : string;
-    date: string;
-  }
+  }, [refresh]);  
   
-  const [church, setChurch] = useState<ChurchsProps>();
-  const [churchNotice, setChurchNotice] = useState<ChurchNoticeProps[]>([]);
-  const [isResdataFalse, setIsResdataFalse] = useState<boolean>(false);
-  const [isResdataFalse2, setIsResdataFalse2] = useState<boolean>(false);
-  const [refresh, setRefresh] = useState<boolean>(false);
+
+  const CheckMyAuth = async (account : any) => {
+    await axios.get(`${MainURL}/list/getmyinfo/${account}`).then((res) => {
+      if (res.data !== false) { 
+        let copy: any = res.data[0].userAuthKey;
+        setMyAuthKey(parseInt(copy));
+      }
+    });
+  }
 
   const fetchPosts = (key : any) => {
     axios.get(`${MainURL}/churchs/getchurch/${key}`).then((res) => {
       if (res.data !== false) {
         setIsResdataFalse(false);
-        let copy: any = [...res.data];
-        setChurch(copy[0]);
+        let copy: any = res.data[0];
+        setChurch(copy);
       } else {
         setIsResdataFalse(true);
       }
@@ -92,6 +108,26 @@ export default function ChurchMain(props : any) {
         setIsResdataFalse2(true);
       }
     });
+  }; 
+
+  const deleteChurchNotice = (item : any) => {
+    axios
+      .post(`${MainURL}/churchs/postnoticedelete`, {
+        postId : item.id,
+        churchKey : item.churchKey
+      })
+      .then((res) => {
+        if (res.data === true) {
+          Alert.alert('삭제 되었습니다.');
+          setRefresh(!refresh);
+          props.navigation.reset({
+            index: 0,
+            routes: [{ name: 'ChurchMain' }]
+          });
+        } else if (res.data === false) {
+          Alert.alert('다시 시도해주세요');
+        }
+      });
   }; 
 
   const handleChurchLeave = () => {
@@ -120,17 +156,19 @@ export default function ChurchMain(props : any) {
     return content;
   };
 
-  const alertNotice = () => { 
-    Alert.alert('교회등록은 목회자(담임)만 가능합니다.', '허위로 등록하거나 장난으로 등록한 것이 발견될 경우, 경고 없이 곧바로 어플 사용에 관하여 제한 조치 됩니다. 등록하시겠습니까?', [
-      { text: '취소', onPress: () => { return }},
-      { text: '확인', onPress: () => props.navigation.navigate("ChurchInfoInput", {asyncGetData : asyncGetData}) }
-    ]);
-  }
 
   const alertImageRevise = () => { 
     Alert.alert('사진을 변경하시겠습니까?', '교회사진 변경은 버튼은 목회자(담임)에게만 노출됩니다.', [
       { text: '취소', onPress: () => { return }},
-      { text: '확인', onPress: () => props.navigation.navigate("ChurchImageRevise", {data : church, userAccount: asyncGetData.userAccount}) }
+      { text: '확인', onPress: () => 
+       {church?.id === 11 ? Alert.alert('테스트입니다.') : props.navigation.navigate("ChurchImageRevise", {data : church, userAccount: asyncGetData.userAccount})} }
+    ]);
+  }
+
+  const alertDeleteChurchNotice = (item : any) => { 
+    Alert.alert(`${item.userName}님이 쓰신 글이 삭제됩니다.`, '정말 삭제하시겠습니까?', [
+      { text: '취소', onPress: () => { return }},
+      { text: '삭제', onPress: () => deleteChurchNotice(item) }
     ]);
   }
 
@@ -140,13 +178,11 @@ export default function ChurchMain(props : any) {
       { text: '나가기', onPress: () => handleChurchLeave() }
     ]);
   }
-
-
   // 앱 링크 함수
   const handleAppLink = async () => {
-    Clipboard.setString('https://churchbooklet.page.link/Kz3a')
+    Clipboard.setString('https://churchbooklet.page.link/WGAX')
     Alert.alert('초대링크가 복사되었습니다.')
-  }  
+  }
 
   return (
     <View style={styles.container}>
@@ -161,59 +197,9 @@ export default function ChurchMain(props : any) {
         {
           asyncGetData.userChurchKey === null 
           ?
-          <>
-            <View style={{height:70, alignItems:'center', justifyContent:'center'}}>
-              <Typography fontSize={18} marginBottom={5}>현재 나의 교회가 지정되어 있지 않습니다.</Typography>
-              <Typography fontSize={18}>아래에서 선택해주세요.</Typography>
-            </View>
-
-            <Divider height={2} marginVertical={10}/>
-
-            <TouchableOpacity
-              style={{borderWidth:1, height:170, borderColor:"#BDBDBD", borderRadius:5, marginBottom:10}}
-              onPress={()=>{
-                props.navigation.navigate("ChurchSearch", { userAccount : asyncGetData.userAccount });
-              }}
-            > 
-              <ImageBackground
-                source={require("../images/believer.jpg")}
-                style={{width:"100%", height:"100%", opacity:0.3}}
-              >
-              </ImageBackground>
-              <View style={{position:'absolute', height:170, top:0, left:0, padding:15, justifyContent:'space-between'}}>
-                <View>
-                <Typography fontSize={18} marginBottom={5}>교회에 출석하는 일반 성도로서</Typography>
-                <Typography fontSize={18} marginBottom={5}>등록되어 있는 교회를 찾아서,</Typography>
-                <Typography fontSize={18}>내 교회로 등록하려는 경우</Typography>
-                </View>
-                <View style={{width:'100%', flexDirection:'row', alignItems:'center', justifyContent:'flex-end'}}>
-                  <Typography fontSize={18} fontWeightIdx={0}>교회 찾기  </Typography>
-                  <AntDesign name='right' size={14} color='#333' />
-                </View>
-              </View>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={{borderWidth:1, height:150, borderColor:"#BDBDBD", borderRadius:5}}
-              onPress={alertNotice}
-            >
-              <ImageBackground
-                source={require("../images/church.jpg")}
-                style={{width:"100%", height:"100%", opacity:0.3}}
-              >
-              </ImageBackground>
-              <View style={{position:'absolute', height:150, top:0, left:0, padding:15, justifyContent:'space-between'}}>
-                <View>
-                  <Typography fontSize={18} marginBottom={5}>교회를 담당하는 담임목사로서</Typography>
-                  <Typography fontSize={18} >교회를 새로 등록하려는 경우</Typography>
-                </View>
-                <View style={{width:'100%', flexDirection:'row', alignItems:'center', justifyContent:'flex-end'}}>
-                  <Typography fontSize={18} fontWeightIdx={0}>교회 등록하기  </Typography>
-                  <AntDesign name='right' size={14} color='#333' />
-                </View>
-              </View>
-            </TouchableOpacity>
-          </>
+          <View>
+            <SelectScreen asyncGetData={asyncGetData} navigation={props.navigation}/>
+          </View>
           :
           <>
           {
@@ -224,7 +210,20 @@ export default function ChurchMain(props : any) {
             </View>
             :
             <ScrollView style={{}}>
-              <View style={{flexDirection: 'row', justifyContent:'flex-end', paddingRight:5}}>
+              <View style={{flexDirection: 'row', justifyContent: church?.id === 11 ? 'space-between' : 'flex-end', paddingRight:5, alignItems:'center'}}>
+                {
+                  church?.id === 11 &&
+                  <TouchableOpacity 
+                    hitSlop={{ top: 15, bottom: 15 }}
+                    onPress={()=>{
+                      props.navigation.navigate("Notice")
+                    }}
+                  >
+                    <View style={{padding:10, borderWidth:1, borderColor:'#F15F5F', borderRadius:10}}>
+                      <Typography>사용설명서(목회자용)</Typography>
+                    </View>
+                  </TouchableOpacity>
+                }
                 <TouchableOpacity 
                   hitSlop={{ top: 15, bottom: 15 }}
                   onPress={handleAppLink}
@@ -244,7 +243,18 @@ export default function ChurchMain(props : any) {
               </View>
               <TextBox name='지역' text={`${church.churchAddressCity} ${church.churchAddressCounty}`}/>
               <TextBox name='주소' text={`${church.churchAddressRest}`}/>
-              <TextBox name='전화번호' text={church.churchPhone}/>
+              <View style={{flexDirection:'row', alignItems:'center', paddingHorizontal:20, marginVertical:10}}>
+                <View style={{width:'20%', alignItems:'center'}}>
+                  <Typography color='#8C8C8C'>전화</Typography>
+                </View>
+                <View style={{width:2, height:20, backgroundColor:'#EAEAEA', marginHorizontal:10}}></View>
+                <TouchableOpacity
+                  style={{width:'70%'}}
+                  onPress={()=>{Linking.openURL(`tel:${church.churchPhone}`)}}
+                >
+                  <Typography color='#0054FF'><Text style={{textDecorationLine:'underline'}}>{church.churchPhone}</Text></Typography>
+                </TouchableOpacity>
+              </View>
               <TextBox name='담임목사' text={`${church.churchPastor} 목사`}/>
 
               <View style={[styles.section, {alignItems:'center'}]}>
@@ -276,60 +286,94 @@ export default function ChurchMain(props : any) {
 
               <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between', marginBottom:5}}>
                 <Typography fontSize={18} fontWeightIdx={1}>교회소식</Typography>
-                <TouchableOpacity 
-                  style={{padding:5, borderWidth:1, borderColor:'#8C8C8C', borderRadius:10}}
-                  onPress={()=>{
-                    props.navigation.navigate('ChurchNoticePost', { post: null, editMode: null, churchKey : church?.id})
-                  }}
-                >
-                  <Typography fontSize={12}  color='#8C8C8C'>글쓰기</Typography>
-                </TouchableOpacity>
+                <View style={{flexDirection:'row'}}>
+                  {
+                    asyncGetData.userAccount === church.userAccount && 
+                    <TouchableOpacity 
+                      style={{padding:5, borderWidth:1, borderColor: isDeleteBtnShow ? '#FF0000' : '#8C8C8C', borderRadius:10, marginRight:10}}
+                      onPress={()=>{church?.id === 11 ? Alert.alert('테스트입니다.') : setIsDeleteBtnShow(!isDeleteBtnShow)}}
+                    >
+                      {
+                        isDeleteBtnShow
+                        ? <Typography fontSize={12}  color='#FF0000'>삭제완료</Typography>
+                        : <Typography fontSize={12}  color='#8C8C8C'>삭제하기</Typography>
+                      }
+                    </TouchableOpacity>
+                  }
+                  <TouchableOpacity 
+                    style={{padding:5, borderWidth:1, borderColor:'#8C8C8C', borderRadius:10}}
+                    onPress={()=>{
+                      church?.id === 11 ? Alert.alert('테스트입니다.') 
+                      : props.navigation.navigate('ChurchNoticePost', { post: null, editMode: null, churchData : church})
+                    }}
+                  >
+                    <Typography fontSize={12}  color='#8C8C8C'>글쓰기</Typography>
+                  </TouchableOpacity>
+                </View>
               </View>
               <View style={{width:'100%', flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:20}}>
                 <Typography fontSize={12} color='#8C8C8C'>최근 10개 까지만 보여집니다.</Typography>
               </View>
-
-              <View style={{minHeight:100}}>
+              
               {
-                churchNotice.length > 0
+                church?.id === myAuthKey
                 ?
-                <>
+                <View style={{minHeight:100}}>
                 {
-                  churchNotice.slice(0,10).map((item:any, index:any)=>{
-                    return(
-                      <TouchableOpacity 
-                        key={index}
-                        onPress={()=>{props.navigation.navigate('ChurchNoticeDetail', {data : item, churchKey : church?.id});}}  
-                      >
-                        <View style={{flexDirection:'row', alignItems:'center', marginVertical:5, 
-                                      borderWidth:1, borderColor:'#EAEAEA', padding:10}}>
-                          <View style={{width:'90%'}}>
-                            <Typography >{renderPreview(item.title)}</Typography>
-                            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                              <View style={{width:150, flexDirection: 'row', alignItems:'center'}}>
-                                <Typography fontSize={14} color='#000'>{item.userName}  </Typography>
-                                <Typography fontSize={14} color='#8C8C8C'>{item.userDuty}</Typography>
+                  churchNotice.length > 0
+                  ?
+                  <>
+                  {
+                    churchNotice.slice(0,10).map((item:any, index:any)=>{
+                      return(
+                        <TouchableOpacity 
+                          key={index}
+                          onPress={()=>{
+                            asyncGetData.userAccount === church.userAccount && isDeleteBtnShow 
+                            ? alertDeleteChurchNotice(item)
+                            : props.navigation.navigate('ChurchNoticeDetail', {data : item, churchData : church})
+                          }}  
+                        >
+                          <View style={{flexDirection:'row', alignItems:'center', marginVertical:5, 
+                                        borderWidth:1, borderColor:'#EAEAEA', padding:10}}>
+                            <View style={{width:'90%'}}>
+                              <Typography >{renderPreview(item.title)}</Typography>
+                              <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                <View style={{width:150, flexDirection: 'row', alignItems:'center'}}>
+                                  <Typography fontSize={14} color='#000'>{item.userName}  </Typography>
+                                  <Typography fontSize={14} color='#8C8C8C'>{item.userDuty}</Typography>
+                                </View>
+                                <Typography fontSize={12} color='#8C8C8C'>{item.date}</Typography>
                               </View>
-                              <Typography fontSize={12} color='#8C8C8C'>{item.date}</Typography>
                             </View>
+                            <View style={{width:'10%', alignItems:'flex-end'}}>
+                              {
+                                isDeleteBtnShow
+                                ? <AntDesign name='close' color='#FF0000' size={20}/>
+                                : <AntDesign name='right' color='#333' />
+                              }
+                            </View>  
                           </View>
-                          <View style={{width:'10%', alignItems:'flex-end'}}>
-                            <AntDesign name='right' color='#333' />
-                          </View>  
-                        </View>
-                      </TouchableOpacity>
-                    )
-                  })
+                        </TouchableOpacity>
+                      )
+                    })
+                  }
+                  </>
+                  :
+                  <>
+                    <View style={{justifyContent:'center', alignItems:'center', marginVertical:5, marginTop:15}}>
+                      <Typography>등록된 게시글이 없습니다.</Typography>
+                    </View>
+                  </>
                 }
-                </>
+                </View>
                 :
-                <>
-                  <View style={{justifyContent:'center', alignItems:'center', marginVertical:5, marginTop:15}}>
-                    <Typography>등록된 게시글이 없습니다.</Typography>
-                  </View>
-                </>
+                <View style={{height:100, alignItems:'center', justifyContent:'center'}}>
+                  <Typography>아직 등록 승인 되지 않습니다.</Typography>
+                  <Typography>승인 이후 게시물을 볼 수 있습니다.</Typography>
+                </View>
               }
-              </View>
+              
 
               <Divider height={5} marginVertical={15}/>              
               

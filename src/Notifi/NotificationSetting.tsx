@@ -67,8 +67,7 @@ export default function NotificationSetting (props : any) {
       setIsNotifiAll(JSON.parse(copy.notifiNotice));
       setIsNotifiNotice(JSON.parse(copy.notifiNotice));
       setIsNotifiBoard(JSON.parse(copy.notifiBoard));
-      setIsNotifiInfo(JSON.parse(copy.notifiInfo));
-      setIsNotifiOurConcour(JSON.parse(copy.notifiOurConcour));
+      setIsNotifiNewUser(JSON.parse(copy.notifiNewUser));
     });
   };
 
@@ -79,22 +78,19 @@ export default function NotificationSetting (props : any) {
   const [isNotifiAll, setIsNotifiAll] = useState<boolean | null>(null);
   const [isNotifiNotice, setIsNotifiNotice] = useState<boolean | null>(null);
   const [isNotifiBoard, setIsNotifiBoard] = useState<boolean | null>(null);
-  const [isNotifiInfo, setIsNotifiInfo] = useState<boolean | null>(null);
-  const [isNotifiOurConcour, setIsNotifiOurConcour] = useState<boolean | null>(null);
+  const [isNotifiNewUser, setIsNotifiNewUser] = useState<boolean | null>(null);
 
   const handleToggleNotifiAll = () => {
     if (isNotifiAll === true) {
       setIsNotifiAll(false)
       setIsNotifiNotice(false);
       setIsNotifiBoard(false);
-      setIsNotifiInfo(false);
-      setIsNotifiOurConcour(false);
+      setIsNotifiNewUser(false);
     } else {
       setIsNotifiAll(true);
       setIsNotifiNotice(true);
       setIsNotifiBoard(true);
-      setIsNotifiInfo(true);
-      setIsNotifiOurConcour(true);
+      setIsNotifiNewUser(true);
     }
   };
 
@@ -106,13 +102,10 @@ export default function NotificationSetting (props : any) {
     setIsNotifiBoard(!isNotifiBoard);
   };
 
-  const handleToggleNotifiInfo = () => {
-    setIsNotifiInfo(!isNotifiInfo);
+  const handleToggleNotifiNewUser = () => {
+    setIsNotifiNewUser(!isNotifiNewUser);
   };
 
-  const handleToggleNotifiOurConcour = () => {
-    setIsNotifiOurConcour(!isNotifiOurConcour);
-  };
 
   const handleSaveSettings = () => {
     axios
@@ -120,9 +113,8 @@ export default function NotificationSetting (props : any) {
         userAccount : asyncGetData.userAccount,
         notifiAll : isNotifiAll,
         notifiBoard : isNotifiBoard,
-        notifiInfo : isNotifiInfo,
+        notifiNewUser : isNotifiNewUser,
         notifiNotice : isNotifiNotice,
-        notifiOurConcour : isNotifiOurConcour
       })
       .then((res) => {
         if (res.data === true) {
@@ -157,8 +149,10 @@ export default function NotificationSetting (props : any) {
       </View>
 
       <View style={[styles.section, {flex:1}]}>
-        <CustomSwitch title='공지사항 알림' value={isNotifiNotice} setValue={setIsNotifiNotice} toggleFuncfion={handleToggleNotifiNotice} />
-        <CustomSwitch title='게시판 새글 알림' value={isNotifiBoard} setValue={setIsNotifiBoard} toggleFuncfion={handleToggleNotifiBoard} />
+        <CustomSwitch title='교회수첩 공지사항 알림' value={isNotifiNotice} setValue={setIsNotifiNotice} toggleFuncfion={handleToggleNotifiNotice} />
+        <Divider height={2} marginVertical={10}/>
+        <CustomSwitch title='내교회 게시판 새글 알림' value={isNotifiBoard} setValue={setIsNotifiBoard} toggleFuncfion={handleToggleNotifiBoard} />
+        <CustomSwitch title='내교회 교인 등록 알림' value={isNotifiBoard} setValue={setIsNotifiNewUser} toggleFuncfion={handleToggleNotifiNewUser} />
       </View>
 
       <ButtonBox leftFunction={closeNotifiSetting} leftText='취소' rightFunction={handleSaveSettings} rightText='설정완료' />
@@ -172,7 +166,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingBottom:10
+    paddingBottom:30
   },
   section: {
     padding: 20

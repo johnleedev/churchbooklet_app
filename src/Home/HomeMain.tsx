@@ -15,6 +15,7 @@ import Toast from 'react-native-toast-message';
 import { Divider } from '../Components/Divider';
 import Clipboard from '@react-native-clipboard/clipboard';
 import RegisterBoard from './RegisterBoard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function HomeMain(props : any) {
 
@@ -32,9 +33,8 @@ function HomeMain(props : any) {
     }
   };
 
-  // 게시판 최신 글 가져오기
   const [advs, setAdvs] = useState<any>([]);
-  const fetchPosts = () => {
+  const fetchPosts = async () => {
     axios.get(`${MainURL}/home/getadvertise`).then((res) => {
       let copy: any = [...res.data];
       copy.reverse();
@@ -47,12 +47,6 @@ function HomeMain(props : any) {
     fetchPosts();
   }, [refresh]);
 
-
-  // 이벤트 함수
-  const handleevent = async () => {
-    // Clipboard.setString('https://studentsclassic.page.link/3N7P')
-    Alert.alert('초대링크가 복사되었습니다.')
-  }  
 
   // 알림 허용 여부 확인
   const handleCheckNotifications = async () => {
@@ -172,7 +166,7 @@ function HomeMain(props : any) {
         <Divider height={5} />
 
         {/* 새로등록된교회 */}
-        <RegisterBoard />
+        <RegisterBoard navigation={props.navigation}/>
 
         <Divider height={5} />
 
@@ -255,7 +249,7 @@ const styles = StyleSheet.create({
 const contents = StyleSheet.create({
   box: {
     width: '95%',
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     marginVertical : 10,
     padding: 15
   },
@@ -287,7 +281,7 @@ const contents = StyleSheet.create({
     borderRadius : 10
   },
   contentBox: {
-    backgroundColor: 'white'
+    backgroundColor: '#fff'
   },
   contentTitleBox : {
     height: 50,

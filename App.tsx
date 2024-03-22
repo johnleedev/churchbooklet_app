@@ -12,6 +12,7 @@ import Toast, { BaseToast } from "react-native-toast-message";
 import { AppRegistry } from 'react-native';
 import Navi_Notifi from "./src/Navi_Notifi";
 import { RecoilRoot } from "recoil";
+import Navi_ChurchSearch from "./src/Navi_ChurchSearch";
 
 const Stack = createNativeStackNavigator();
 
@@ -51,6 +52,7 @@ function App () {
         <Stack.Navigator>
           <Stack.Screen name="SplashLoading" component={SplashLoading} options={{ headerShown: false }} />
           <Stack.Screen name="Navi_Main" component={Main} options={{ headerShown: false }} />
+          <Stack.Screen name="Navi_ChurchSearch" component={Navi_ChurchSearch} options={{ headerShown: false }} />
           <Stack.Screen name="Navi_Login" component={Navi_Login} options={{ headerShown: false }}/>
           <Stack.Screen name="Navi_Notifi" component={Navi_Notifi} options={{ headerShown: false }} />
           </Stack.Navigator>

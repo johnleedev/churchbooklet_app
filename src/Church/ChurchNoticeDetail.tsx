@@ -16,6 +16,7 @@ import DateFormmating from '../Components/DateFormmating';
 export default function ChurchNoticeDetail (props: any) {
 
   const route : any = useRoute();
+  const churchData = route.params.churchData;
   const [asyncGetData, setAsyncGetData] = useState<any>();
   const [isUser, setIsUser] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -38,10 +39,9 @@ export default function ChurchNoticeDetail (props: any) {
 
   const deletePost = () => {
     axios
-      .post(`${MainURL}/churchs/postnoticedelete/${route.params.data.id}`, {
+      .post(`${MainURL}/churchs/postnoticedelete`, {
         postId : route.params.data.id,
-        userAccount: asyncGetData.userAccount,
-        churchKey : route.params.churchKey
+        churchKey : churchData.id
       })
       .then((res) => {
         if (res.data === true) {
@@ -105,13 +105,13 @@ export default function ChurchNoticeDetail (props: any) {
         <View style={styles.section}>
           <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems:'center', marginBottom:15}}>
             <Typography fontSize={14} color='#D76F23'>교회소식</Typography>  
-            {isUser ? 
-            <TouchableOpacity 
-              onPress={() => setIsModalVisible(true)}
-              style={{position:'absolute', right: 0, paddingHorizontal:10}}>
-              <Typography><Entypo name="dots-three-vertical" size={15} color="black" /></Typography>
-            </TouchableOpacity>
-            : null}
+            {isUser &&
+              <TouchableOpacity 
+                onPress={() => setIsModalVisible(true)}
+                style={{position:'absolute', right: 0, paddingHorizontal:10}}>
+                <Typography><Entypo name="dots-three-vertical" size={15} color="black" /></Typography>
+              </TouchableOpacity>
+            }
           </View>
           <Typography fontSize={20} marginBottom={10} fontWeightIdx={1}>{route.params.data?.title}</Typography>
           <View style={[styles.titleContainer, {justifyContent:'space-between', marginBottom: 8}]}>
@@ -134,7 +134,6 @@ export default function ChurchNoticeDetail (props: any) {
         </View>
         
         <Divider height={2}/>
-        
              
         {/* 수정&삭제 모달 */}
         <Modal
@@ -158,7 +157,8 @@ export default function ChurchNoticeDetail (props: any) {
                   props.navigation.navigate('ChurchNoticePost', {
                     post: route.params.data,
                     editMode: true,
-                    churchKey : route.params.churchKey
+                    churchKey : route.params.churchKey,
+                    churchData : churchData
                   });
                 }}
                 style={styles.modalButton}
@@ -180,6 +180,7 @@ export default function ChurchNoticeDetail (props: any) {
               >
                 <Typography>취소</Typography>
               </TouchableOpacity>
+              
             </View>
           </View>
         </Modal>  

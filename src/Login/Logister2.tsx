@@ -1,303 +1,180 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert, Image, Platform, Modal, ScrollView, KeyboardAvoidingView, Dimensions } from 'react-native';
-import {launchImageLibrary, ImageLibraryOptions, Asset} from 'react-native-image-picker';
-import { getStatusBarHeight } from "react-native-status-bar-height";
+import { View, TouchableOpacity, Text, StyleSheet, Alert, ImageBackground, Platform, Modal, ScrollView, KeyboardAvoidingView } from 'react-native';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
-import axios from 'axios';
-import MainURL from "../../MainURL";
-import AsyncSetItem from '../AsyncSetItem'
 import { Typography } from '../Components/Typography';
 import { Divider } from '../Components/Divider';
-import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Loading from '../Components/Loading';
+import { useRecoilState } from 'recoil';
+import { recoilLoginData } from '../RecoilStore';
 
-function Logister2 (props : any) {
+export default function Logister2 (props : any) {
 
-  const routeDataSet = () => {
-    if(props.route.params === null || props.route.params === undefined) {
-      return
-    } else {
-      const routeData = props.route.params.data;
-      setRouteData(routeData);
-      setRefreshToken(routeData.refreshToken);
-      setUserAccount(routeData.email);
-      setUserURL(routeData.userURL);
-      {
-        routeData.name && setUserName(routeData.name);
-      }
-    }
-  }
-
-  useEffect(()=>{
-    routeDataSet();
-  }, [])
-
-  const [routeData, setRouteData] = useState({});
-  const [refreshToken, setRefreshToken] = useState('');
-  const [userAccount, setUserAccount] = useState('');
-  const [userName, setUserName] = useState('');
-  const [userPhone, setUserPhone] = useState('');
-  const [userURL, setUserURL] = useState('');
-  const [images, setImages] = useState<Asset[]>([]);
-  const [imageNames, setImageNames] = useState('');
-
-  const onChangeUserPhone = (text : any) => {
-    const userPhoneRegex = /^[0-9]*$/
-    if (!userPhoneRegex.test(text)) {
-      Alert.alert('숫자만 입력해주세요');
-    } else {
-      setUserPhone(text);  
-    }
-  };
-
+  const [userLoginData, setUserLoginData] = useRecoilState(recoilLoginData);
   
-  // 사진 첨부 함수 -----------------------------------------------------------------
-  const [imageLoading, setImageLoading] = useState<boolean>(false);
-  const showPhoto = async ()=> {
-    setImageLoading(true);
-    const option: ImageLibraryOptions = {
-        mediaType : "photo",
-        selectionLimit : 1,
-        maxWidth: 300,
-        maxHeight: 300,
-        includeBase64: Platform.OS === 'android'
-    }
-    await launchImageLibrary(option, async(res) => {
-      if(res.didCancel) Alert.alert('취소')
-      else if(res.errorMessage) Alert.alert('Error : '+ res.errorMessage)
-      else {
-        const uris: Asset[] = res.assets || [];
-        const copy = `${userAccount}_${uris[0].fileName}`
-        uris[0].fileName = copy
-        setImages(uris);
-        setImageNames(copy);
-      }
-      setImageLoading(false);
-    }) 
-  }
-
-  // 회원가입하기 함수 -----------------------------------------------------------------
-  const handleSignup = async () => {
-
-    const getParams = {
-      ...routeData,
-      userPhone: userPhone,
-      userImage : imageNames,
-    };
-
-    try {
-      const formData = new FormData();
-      // 사진 포함
-      if (images.length > 0) {
-        images.forEach((image) => {
-          formData.append("img", {
-            name: image.fileName,
-            type: image.type,
-            uri: image.uri,
-          });
-        });
-        await axios.post(`${MainURL}/login/logisterwithimage`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          params: getParams,
-        }).then((res) => {
-          if (res.data === userAccount) {
-            Alert.alert('회원가입이 완료되었습니다!');
-            AsyncSetItem(refreshToken, userAccount, userName, userPhone, '', '', '성도', userURL);
-            props.navigation.navigate('Result');
-          } else {
-            Alert.alert('다시 시도해 주세요.');
-          }
-        })
-        .catch(() => {
-          console.log('실패함');
-        });
-      } else {
-        // 사진 미포함
-        await axios.post(`${MainURL}/login/logisterwithoutimage`, getParams)
-        .then((res) => {
-          if (res.data === userAccount) {
-            Alert.alert('회원가입이 완료되었습니다!');
-            AsyncSetItem(refreshToken, userAccount, userName, userPhone, '', '', '성도', userURL);
-            props.navigation.navigate('Result');
-          } else {
-            Alert.alert('다시 시도해 주세요.');
-          }
-        })
-        .catch(() => {
-          console.log('실패함');
-        });
-      }
-
-    } catch (error) {
-      Alert.alert('다시 시도해 주세요.');
-    }
-        
-  };
-
-  const alertSignup = () => { 
-    Alert.alert('중요 공지', '교회수첩 어플은, 효율적인 어플 운영을 위해 회원님들의 정확한 프로필을 필요로 합니다. 가입된 정보가 사실과 다를 경우, 어플 사용에 제한이 있을 수 있습니다.', [
-      { text: '가입 취소', onPress: () => { return }},
-      { text: '확인', onPress: () => handleSignup() }
-    ]);
-  }
-  
-  const alertPageOut = () => { 
-    Alert.alert('작성한 모든 내용이 지워집니다.', '나가시겠습니까?', [
-      { text: '취소', onPress: () => { return }},
-      { text: '나가기', onPress: () => handlePageOut() }
-    ]);
-  }
-
-  const handlePageOut = () => {
-    setUserAccount('');
-    setUserName('');
-    setUserPhone('');
-    props.navigation.navigate("Login");
-  };
-
   // Logister 페이지로 전환
-  const handleLogister = () => {
-    alertSignup();
+  const goLogister3Page = () => {
+    props.navigation.navigate('Logister3');
   };
+
+  const handlePastorLogin = () => {
+    const copy = {...userLoginData}
+    copy.userChurch = '테스트교회';
+    copy.userChurchKey = '11';
+    setUserLoginData(copy);
+    props.navigation.navigate('Logister3');
+  };
+
+  const alertPastorLogin = () => { 
+    Alert.alert(`담임목회자는, 일단 '테스트교회'로 등록되며, 가입 완료된 후에, 본인의 교회를 등록하시면 됩니다.`, `가입을 계속 진행하시겠습니까?`, [
+      { text: '취소', onPress: () => { return }},
+      { text: '확인', onPress: () => handlePastorLogin() }
+    ]);
+  }
 
   return (
-    <View style={Platform.OS === 'android' ? styles.android : styles.ios}>
-      <View style={{flex:1, backgroundColor:'#fff'}}>
+    <View style={{flex:1, backgroundColor:'#fff'}}>
 
-        <View style={{padding:20, alignItems: 'center', marginTop: 10, justifyContent: 'center'}}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={()=>{
-              props.navigation.goBack();
-            }}
-            >
-            <EvilIcons name="arrow-left" size={30} color="black" />
-          </TouchableOpacity>
-          <Typography>회원가입</Typography>
+      <View style={{padding:20, alignItems: 'center', marginTop: 10, justifyContent: 'center'}}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={()=>{
+            props.navigation.goBack();
+          }}
+          >
+          <EvilIcons name="arrow-left" size={30} color="black" />
+        </TouchableOpacity>
+        <Typography fontSize={20}>회원가입</Typography>
+      </View>
+
+      <Divider/>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 50}
+        style={{flex:1}}
+      >
+      <ScrollView style={styles.container}>
+      
+        <View style={{marginBottom: 30}}>
+          <View style={{flexDirection:'row', marginBottom:10}}>
+            <Typography fontSize={18} fontWeightIdx={1} marginBottom={10}>STEP. </Typography>
+            <Typography fontSize={18} fontWeightIdx={1} marginBottom={10} color='#ccc'>1</Typography>
+            <View style={{width:20, height:2, backgroundColor:'#ccc', marginVertical:14, marginHorizontal:5}}></View>
+            <Typography fontSize={18} fontWeightIdx={1} marginBottom={10} >2</Typography>  
+            <View style={{width:20, height:2, backgroundColor:'#ccc', marginVertical:14, marginHorizontal:5}}></View>
+            <Typography fontSize={18} fontWeightIdx={1} marginBottom={10} color='#ccc'>3</Typography>  
+          </View>
+          <Typography fontSize={22} fontWeightIdx={1}>
+            본인이 출석하는 교회를{'\n'}
+            등록해주세요.
+          </Typography>
+        </View>
+        
+        <View style={{marginBottom:10}}>
+          {/* 교회이름 */}
+          <Typography color='#8C8C8C' fontWeightIdx={1} fontSize={18}>교회이름 <Typography color='#E94A4A'>*</Typography></Typography>
+          <View style={[styles.input, {width: '100%', marginBottom:20}]}>
+            <Typography>{userLoginData.userChurch}</Typography>
+          </View>
         </View>
 
-        <Divider/>
-
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 50}
-          style={{flex:1}}
-        >
-        <ScrollView style={styles.container}>
-       
-          <View style={{marginBottom: 20}}>
-            <View style={{flexDirection:'row'}}>
-              <View style={{width:40, height:50, alignItems: 'center', marginBottom:10}}>
-                <Typography fontSize={24} fontWeightIdx={1} color='#ccc'>01</Typography>  
+        {
+          userLoginData.userChurch === ""
+          ?
+          <>
+          <View style={{alignItems:'center', marginBottom:15}}>
+            <Typography color='#8C8C8C' fontWeightIdx={1}>* 아래에서 선택해주세요</Typography>
+          </View>
+          <TouchableOpacity
+            style={{borderWidth:1, height:150, borderColor:"#BDBDBD", borderRadius:5, marginBottom:10}}
+            onPress={()=>{
+              props.navigation.navigate('Navi_ChurchSearch', {screen: 'ChurchSearchMain', params: {sort : 'login'}})
+            }}
+          > 
+            <ImageBackground
+              source={require("../images/believer.jpg")}
+              style={{width:"100%", height:"100%", opacity:0.3}}
+            >
+            </ImageBackground>
+            <View style={{position:'absolute', height:150, top:0, left:0, padding:15, justifyContent:'space-between'}}>
+              <View>
+                <Typography fontSize={18} marginBottom={5}>교회에 출석하는 일반 성도로서</Typography>
+                <Typography fontSize={18} marginBottom={5}>내 교회를 찾으려는 경우</Typography>
               </View>
-              <View style={{marginHorizontal:10}}>
-                <View style={{width:40, height:15}}></View>
-                <View style={{width:40, height:2, backgroundColor: '#ccc'}}></View>
-              </View>
-              <View style={{width:40, height:50, alignItems: 'center'}}>
-                <Typography fontSize={24} fontWeightIdx={1}>02</Typography>  
+              <View style={{width:'100%', flexDirection:'row', alignItems:'center', justifyContent:'flex-end'}}>
+                <Typography fontSize={18} fontWeightIdx={0}>교회 찾기  </Typography>
+                <AntDesign name='right' size={14} color='#333' />
               </View>
             </View>
-            <Typography fontSize={22} fontWeightIdx={1}>
-              마지막으로 사용하실 연락처와{'\n'}
-              프로필 사진을 첨부해주세요.
-            </Typography>
-          </View>
-          
-          <View style={{marginBottom:10}}>
-            {/* 핸드폰 번호 입력 */}
-            <Typography color='#8C8C8C' fontWeightIdx={1}>연락처 <Typography color='#BDBDBD' fontSize={12}>(선택)</Typography></Typography>
-            <TextInput
-              style={[styles.input, {width: '100%', marginBottom:20}]}
-              placeholder="-를 제외하고 입력해주세요"
-              placeholderTextColor='#5D5D5D'
-              onChangeText={onChangeUserPhone}
-              value={userPhone}
-            />
-          </View>
+          </TouchableOpacity>
 
-          <View style={{}}>
-            {/* 사진 첨부 */}
-            <Typography color='#8C8C8C' fontWeightIdx={1}>프로필 사진 첨부 <Typography color='#BDBDBD' fontSize={12}>(선택)</Typography></Typography>
-            
-            { images.length > 0
-              ? 
-              <View style={{flexDirection:'row'}}>
-                <View style={{ width: 120, height: 150, margin: 5 }}>
-                  <Image source={{ uri: images[0].uri }} style={{ width: '100%', height: '100%', borderRadius:10 }} />
-                </View>
-                <TouchableOpacity
-                  onPress={()=>{setImages([]); setImageNames('')}}
-                >
-                  <View style={{width:30, height:30, borderWidth:1, borderColor:'#8C8C8C', borderRadius:5,
-                                alignItems:'center', justifyContent:'center', marginHorizontal:5, marginVertical:10}}>
-                    <AntDesign name="close" size={20} color="#8C8C8C"/>
-                  </View>
-                </TouchableOpacity>
+          <TouchableOpacity
+            style={{borderWidth:1, height:150, borderColor:"#BDBDBD", borderRadius:5}}
+            onPress={alertPastorLogin}
+          >
+            <ImageBackground
+              source={require("../images/church.jpg")}
+              style={{width:"100%", height:"100%", opacity:0.3}}
+            >
+            </ImageBackground>
+            <View style={{position:'absolute', height:150, top:0, left:0, padding:15, justifyContent:'space-between'}}>
+              <View>
+                <Typography fontSize={18} marginBottom={5}>교회를 담당하는 담임목사로서</Typography>
+                <Typography fontSize={18} >교회를 새로 등록하려는 경우</Typography>
               </View>
-              :
-              <>
-              {
-                imageLoading ?
-                <View style={{position:'absolute', alignItems:'center', justifyContent:'center'}}>
-                  <View style={{width:120, height:150}}>
-                    <Loading />
-                  </View>
-                </View>
-                :
-                <TouchableOpacity
-                  onPress={showPhoto}
-                >
-                  <View style={{width:120, height:150, borderWidth:1, borderColor:'#8C8C8C', borderRadius:5,
-                                alignItems:'center', justifyContent:'center', marginHorizontal:5, marginVertical:10}}>
-                    <Entypo name="plus" size={20} color="#8C8C8C"/>
-                  </View>
-                </TouchableOpacity>
-              }
-              </>
-            }
-          </View>
-
-        </ScrollView>
-        </KeyboardAvoidingView>
-
-         {/* 하단 버튼 */}
-         <View style={{padding:20, marginBottom:5}}>
-            <TouchableOpacity 
-              onPress={handleLogister}
-              style={styles.nextBtnBox}
-              >
-              <Text style={styles.nextBtnText}>가입완료</Text>
+              <View style={{width:'100%', flexDirection:'row', alignItems:'center', justifyContent:'flex-end'}}>
+                <Typography fontSize={18} fontWeightIdx={0}>담임 목회자로 가입하기 </Typography>
+                <AntDesign name='right' size={14} color='#333' />
+              </View>
+            </View>
+          </TouchableOpacity>
+          </>
+          :
+          <View style={{alignItems:'center'}}>
+            <TouchableOpacity
+              onPress={()=>{
+                props.navigation.navigate('Navi_ChurchSearch', {screen: 'ChurchSearchMain', params: {sort : 'login'}})
+              }}
+            > 
+              <View style={{padding:15, flexDirection:'row', alignItems:'center', 
+                            borderWidth:1, borderColor:"#BDBDBD", borderRadius:10}}>
+                <Typography>다시 교회 검색 하기</Typography>
+                <AntDesign name='right' size={14} color='#333' />
+              </View>
             </TouchableOpacity>
-
-            <View style={styles.linksContainer}>
-              <TouchableOpacity onPress={alertPageOut}>
-                <Text style={styles.linkButton}>나가기</Text>
-              </TouchableOpacity>
-            </View>
           </View>
+        }
+        
 
+        <View style={{height:100}}></View>
+      </ScrollView>
+      </KeyboardAvoidingView>
+
+        {/* 하단 버튼 */}
+        <View style={{padding:20}}>
+        <TouchableOpacity 
+          onPress={()=>{
+            userLoginData.userChurch !== ""
+            ? goLogister3Page()
+            : Alert.alert('교회를 선택해주세요')
+          }}
+          style={
+            userLoginData.userChurch !== "" ? [styles.nextBtnBox, { backgroundColor: '#333'}] 
+            : [styles.nextBtnBox, { backgroundColor: '#BDBDBD'}]
+          }
+          >
+          <Text style={styles.nextBtnText}>다음</Text>
+        </TouchableOpacity>
       </View>
 
     </View>
+
   );
 };
 
 
 
 const styles = StyleSheet.create({
-  android: {
-    flex: 1,
-    backgroundColor: '#333',
-  },
-  ios : {
-    flex: 1,
-    backgroundColor: '#333',
-    paddingTop: getStatusBarHeight(),
-  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -314,7 +191,7 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   input: {
-    height: 40,
+    height: 50,
     width: '100%',
     borderColor: '#DFDFDF',
     justifyContent: 'center',
@@ -323,6 +200,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
     borderRadius: 5,
+    fontSize: 18,
     color: '#333'
   },  
   message: {
@@ -386,4 +264,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Logister2;
+

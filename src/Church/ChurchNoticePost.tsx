@@ -18,6 +18,7 @@ export default function ChurchNoticePost (props: any) {
   // 수정기능
   const route : any = useRoute();
   const { post, editMode } = route.params;
+  const churchData = route.params.churchData;
   
   // AsyncGetData
   const [asyncGetData, setAsyncGetData] = useState<any>({});
@@ -47,7 +48,8 @@ export default function ChurchNoticePost (props: any) {
     if (post !== null && editMode !== null) {
       // 기존 글 수정 처리
       axios
-        .post(`${MainURL}/churchs/postnoticeedit/${post.id}`, {
+        .post(`${MainURL}/churchs/postnoticeedit`, {
+          postId : post.id,
           title: title, content: content,
           churchKey : route.params.churchKey 
         })
@@ -69,7 +71,7 @@ export default function ChurchNoticePost (props: any) {
           userAccount : asyncGetData.userAccount,
           userName: asyncGetData.userName,
           userDuty : asyncGetData.userDuty,
-          churchKey : route.params.churchKey
+          churchKey : churchData.id,
         })
         .then((res) => {
           if (res.data === true) {
@@ -95,6 +97,10 @@ export default function ChurchNoticePost (props: any) {
       <Divider height={2} />
       <ScrollView style={{flex:1}}>
         <View style={styles.section}>
+
+          <View style={{alignItems:'center', marginBottom:10}}>
+            <Typography fontWeightIdx={1}>{churchData.churchName}</Typography>
+          </View>
 
           <View style={{padding:15, backgroundColor:'rgba(215, 111, 35, 0.10)', marginBottom:20}}>
             <Typography fontSize={12} >장난스러운 글이나, 불건전하거나, 불법적인 내용 작성시, 경고 없이 곧바로 글은 삭제됩니다. 또한 사용자 계정은 서비스 사용에 제한이 있을 수 있습니다. </Typography>

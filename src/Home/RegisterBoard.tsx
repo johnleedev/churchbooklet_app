@@ -45,13 +45,6 @@ export default function RegisterBoard (props : any) {
   }, []);
 
 
-  const renderPreview = (content : string) => {
-    if (content?.length > 20) {
-      return content.substring(0, 20) + '...';
-    }
-    return content;
-  };
-
   return (
     <View style={styles.container}>
       <Title title='새로 등록된 교회' enTitle='New'/>
@@ -61,20 +54,30 @@ export default function RegisterBoard (props : any) {
       <View style={styles.section}>
         {
           churchs.slice(0,5).map((item:any, index:any)=>{
+
             return (
-              <View
+              <TouchableOpacity
+                activeOpacity={0.7}
                 key={index} 
                 style={{marginVertical:10}}
+                onPress={()=>{
+                  props.navigation.navigate("Navi_ChurchSearch", {screen : "ChurchSearchDetail", params: { data: item, sort : 'search' }});
+                }}
               >
-                <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
-                  <Typography fontWeightIdx={0}>{item.churchName}</Typography>
-                  <Typography fontSize={14} color='#8C8C8C'>{item.religiousbody}</Typography>
+                <View style={{flexDirection:'row', alignItems:'center', marginBottom:15}}>
+                  <View style={{width:'90%', flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+                    <Typography fontWeightIdx={1} fontSize={18}>{item.churchName}</Typography>
+                    <View style={{}}>
+                      <Typography fontSize={14} color='#8C8C8C'>{item.religiousbody}</Typography>
+                      <Typography fontSize={14} color='#8C8C8C'>{item.churchAddressCity} {item.churchAddressCounty}</Typography>
+                    </View>
+                  </View>
+                  <View style={{width:'10%', alignItems:'flex-end'}}>
+                    <AntDesign name='right'/>
+                  </View>
                 </View>
-                <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
-                  <Typography fontSize={14} color='#8C8C8C'>{item.churchAddressCity} {item.churchAddressCounty}</Typography>
-                  <Typography fontSize={14} color='#8C8C8C'>{item.churchPastor} 목사</Typography>
-                </View>
-              </View>
+                <Divider/>
+              </TouchableOpacity>
             )
           })
         } 

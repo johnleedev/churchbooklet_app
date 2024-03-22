@@ -11,7 +11,9 @@ import { Divider } from '../Components/Divider';
 import { SubTitle } from '../Components/SubTitle';
 import Loading from '../Components/Loading';
 
-export default function ChurchSearch(props : any) {
+export default function ChurchSearchMain(props : any) {
+
+  const sort = props.route.params.sort;
 
   interface ChurchsProps {
     id: number;
@@ -29,7 +31,8 @@ export default function ChurchSearch(props : any) {
   const [searchSelectResidence, setSearchSelectResidence] = useState<boolean>(true);
   const [isResdataFalse, setIsResdataFalse] = useState<boolean>(false);
 
-  // 검색박스 ----------------------------------------------------------------------
+
+    // 검색박스 ----------------------------------------------------------------------
 
   const fetchPostsSearch = (text: string) => {
     axios.get(`${MainURL}/churchs/searchchurchs/${text}`).then((res) => {
@@ -167,7 +170,7 @@ export default function ChurchSearch(props : any) {
           <View style={[styles.flexBox, { alignItems:"center"}]}>
             <Entypo name="magnifying-glass" size={22} color="#8B8B8B" style={{marginRight:13}}/> 
             <TextInput 
-              placeholder={'교회명,주소,담임목사이름'}
+              placeholder={'교회명,담임목사이름,교회번호'}
               placeholderTextColor="#8C8C8C"
               value={inputValue}
               onChange={changeInputValue} 
@@ -334,7 +337,7 @@ export default function ChurchSearch(props : any) {
                           borderWidth:1, borderColor:"#EAEAEA", borderRadius:10, padding:10
                         }}
                       onPress={()=>{
-                        props.navigation.navigate('ChurchSearchDetail', { data : item,  userAccount : props.route.params.userAccount })
+                        props.navigation.navigate('ChurchSearchDetail', { data : item, sort : sort})
                       }}
                     >
                       <View>
@@ -369,7 +372,7 @@ export default function ChurchSearch(props : any) {
             </View>
           </>
         } 
-        <View style={{height:150}}></View>
+        <View style={{height:300}}></View>
         </ScrollView>
       </View>
      
