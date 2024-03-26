@@ -35,22 +35,26 @@ function MyPageMain (props: any) {
   const [userPhone, setUserPhone] = useState('');
   const [userChurch, setUserChurch] = useState('');
   const [userDuty, setUserDuty] = useState('');
+  const [userURL, setUserURL] = useState('');
   const [images, setImages] = useState<Asset[]>([]);
   const [userimage, setUserImage] = useState('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const asyncFetchData = async () => {
     try {
       const data = await AsyncGetItem();
       if (data) {
-        axios.get(`${MainURL}/mypage/getprofile/${data.userAccount}`).then((res) => {
+        await axios.get(`${MainURL}/mypage/getprofile/${data.userAccount}`).then((res) => {
           setUserAccount(res.data[0].userAccount);
           setUserName(res.data[0].userName);
           setUserPhone(res.data[0]?.userPhone);
           setUserChurch(res.data[0]?.userChurch);
           setUserDuty(res.data[0]?.userDuty);
           setUserImage(res.data[0]?.userImage);
+          setUserURL(res.data[0]?.userURL);
         });
         setAsyncGetData(data);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error(error);
@@ -74,6 +78,7 @@ function MyPageMain (props: any) {
           AsyncStorage.setItem('phone', userPhone);
           AsyncStorage.setItem('duty', userDuty);
           Alert.alert('입력되었습니다.');
+          setRefresh(!refresh);
           profileToggleModal();
         } else {
           Alert.alert(res.data)
@@ -88,10 +93,9 @@ function MyPageMain (props: any) {
     AsyncStorage.removeItem('token');
     AsyncStorage.removeItem('account');
     AsyncStorage.removeItem('name');
-    AsyncStorage.removeItem('phone');
     AsyncStorage.removeItem('church');
+    AsyncStorage.removeItem('churchkey');
     AsyncStorage.removeItem('duty');
-    AsyncStorage.removeItem('URL');
     Alert.alert('로그아웃 되었습니다.');
     props.navigation.replace("Navi_Login")
   };
@@ -112,7 +116,7 @@ function MyPageMain (props: any) {
 
 
   // 직분 선택
-  const optionsDuty = ["성도", "주일학교", "집사", "안수집사", "권사", "장로", "선교사", "전도사", "목사"];
+  const optionsDuty = ["선택", "성도", "주일학교", "집사", "안수집사", "권사", "장로", "선교사", "전도사", "목사", "사모"];
 
   // 사진 변경 함수 ----------------------------------------------------------------   
   const alertChangePhoto = () => {
@@ -211,274 +215,282 @@ function MyPageMain (props: any) {
       
       <Divider height={2} />
 
-      <ScrollView style={styles.container}>
-      
-      <View style={styles.section}>
-        <Typography fontSize={18} fontWeightIdx={1}>기본 정보</Typography>
-        <TouchableOpacity style={{position:'absolute', top:10, right:10, padding:15}}
-         onPress={profileToggleModal}
-        >
-          <AntDesign name='setting' size={20} color='#000'/>
-        </TouchableOpacity>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={isProfileModalVisible}
-          onRequestClose={profileToggleModal}
-        >
-          <View style={{ width: '100%', position: 'absolute', top:80, borderRadius: 20, backgroundColor: 'white', 
-                        padding: 20}}>
-            <Typography marginBottom={10} fontWeightIdx={1}>프로필 편집</Typography>
-            <TouchableOpacity style={{position:'absolute', top:5, right:10, padding:15}}
-              onPress={profileToggleModal}
-              > 
-                <AntDesign name='close' size={20} color='#000'/>
-            </TouchableOpacity>
-            <Divider height={3} marginVertical={10}/>
-            
-              <View style={styles.infoBox}>
-                <Typography>이름: </Typography>
-                <TextInput
-                  style={styles.input}
-                  placeholder="이름"
-                  value={userName}
-                  onChangeText={setUserName}
-                /> 
-              </View>
-              <View style={styles.infoBox}>
-                <Typography>번호: </Typography>
-                <TextInput
-                  style={styles.input}
-                  placeholder="' - '를 제외하고 입력해주세요"
-                  value={userPhone === undefined ? '미정' : userPhone}
-                  onChangeText={onChangeUserPhone}
-                /> 
-              </View>
-              <View style={styles.infoBox}>
-                <Typography>직분: </Typography>
-                <View style={[styles.input, {flexDirection:'row', justifyContent:'space-between', alignItems:'center'}]}>
-                  <SelectDropdown
-                    data={optionsDuty}
-                    defaultValue={userDuty === undefined ? '미정' : userDuty}
-                    onSelect={(selectedItem, index) => {
-                      setUserDuty(selectedItem);
-                    }}
-                    defaultButtonText={optionsDuty[0]}
-                    buttonStyle={{width:'100%', height:50, backgroundColor:'#fff'}}
-                    buttonTextStyle={{fontSize:16}}
-                    dropdownStyle={{width:250, borderRadius:10}}
-                    rowStyle={{ width:250, height: 60}}
-                    rowTextStyle={{fontSize:16}}
-                  />
-                  <AntDesign name='down' size={12} color='#8C8C8C' style={{position:'absolute', right:30}}/>
-                </View>
-              </View>
-              <View style={{height:100, justifyContent:'flex-end'}}>
-                <ButtonBox leftText='취소' leftFunction={profileToggleModal} rightText='변경' rightFunction={changeProfile} />
-              </View>
-          </View>
-        </Modal>
-
-        <View style={styles.infoBox}>
-          <View style={styles.infoTextBox}>
-            <Typography marginBottom={15} >
-              <FontAwesome5 name="cross" size={16} color="#000"/>  계정: {asyncGetData.userAccount}
-            </Typography>
-            <Typography marginBottom={15} >
-              <FontAwesome5 name="cross" size={16} color="#000"/>  이름: {asyncGetData.userName}
-            </Typography>
-            <Typography marginBottom={15} >
-              <FontAwesome5 name="cross" size={16} color="#000"/>  번호: {asyncGetData.userPhone === undefined || asyncGetData.userPhone === null ? '미정' : asyncGetData.userPhone}
-            </Typography>
-            <Typography marginBottom={15} >
-              <FontAwesome5 name="cross" size={16} color="#000"/>  교회: {asyncGetData.userChurch === undefined || asyncGetData.userChurch === null  ? '미정' : asyncGetData.userChurch}
-            </Typography>
-            <Typography marginBottom={15} >
-              <FontAwesome5 name="cross" size={16} color="#000"/>  직분: {asyncGetData.userDuty === undefined || asyncGetData.userDuty === null  ? '미정' : asyncGetData.userDuty}
-            </Typography>
-            <Typography marginBottom={5} >
-              <FontAwesome5 name="cross" size={16} color="#000"/>  로그인 방식: {asyncGetData.userURL}
-            </Typography>
-          </View>
+      {
+        isLoading
+        ?
+        <View style={{width:'100%', height:'100%'}}>
+          <Loading/>
         </View>
-      </View>
+        :
+        <ScrollView style={styles.container}>
+        
+        <View style={styles.section}>
+          <Typography fontSize={18} fontWeightIdx={1}>기본 정보</Typography>
+          <TouchableOpacity style={{position:'absolute', top:10, right:10, padding:15}}
+          onPress={profileToggleModal}
+          >
+            <AntDesign name='setting' size={20} color='#000'/>
+          </TouchableOpacity>
 
-
-      <Divider height={2}/>
-
-      <View style={styles.section}>
-        <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
-          <Typography fontSize={18} fontWeightIdx={1} marginBottom={10}>프로필사진</Typography>
-          {
-            userimage !== '' && 
-            <>
-            {
-              images.length === 0
-              ?
-              <TouchableOpacity 
-                style={{borderWidth:1, borderColor:'#BDBDBD', padding:5, borderRadius:5}}
-                onPress={alertChangePhoto}
-              >
-              <Typography fontSize={14} color='#8C8C8C'>사진 변경하기</Typography>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isProfileModalVisible}
+            onRequestClose={profileToggleModal}
+          >
+            <View style={{ width: '100%', position: 'absolute', top:80, borderRadius: 20, backgroundColor: 'white', 
+                          padding: 20}}>
+              <Typography marginBottom={10} fontWeightIdx={1}>프로필 편집</Typography>
+              <TouchableOpacity style={{position:'absolute', top:5, right:10, padding:15}}
+                onPress={profileToggleModal}
+                > 
+                  <AntDesign name='close' size={20} color='#000'/>
               </TouchableOpacity>
-              :
-              <TouchableOpacity 
-                style={{borderWidth:1, borderColor:'#FF0000', padding:5, borderRadius:5}}
-                onPress={handleChangeImage}
-              >
-              <Typography fontSize={14} color='#FF0000'>변경완료</Typography>
-              </TouchableOpacity>
-            }
-            </>
-          }
-        </View>
-        {
-          userimage !== '' && images.length === 0
-          ?
-          <View style={{width:120, height:150, margin:5}}>
-            <Image style={{width:'100%', height:'100%', resizeMode:'cover', borderRadius:10}} 
-              source={{ uri: `${MainImageURL}/images/userimage/${userimage}`}}/>
-          </View>
-          :
-          <>
-            { images.length > 0
-              ? 
-              <View style={{flexDirection:'row'}}>
-                <View style={{ width: 120, height: 150, margin: 5 }}>
-                  <Image source={{ uri: images[0].uri }} style={{ width: '100%', height: '100%', borderRadius:10 }} />
+              <Divider height={3} marginVertical={10}/>
+              
+                <View style={styles.infoBox}>
+                  <Typography>이름: </Typography>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="이름"
+                    value={userName}
+                    onChangeText={setUserName}
+                  /> 
                 </View>
-                <TouchableOpacity
-                  onPress={()=>{setImages([]); setUserImage('')}}
-                >
-                  <View style={{width:30, height:30, borderWidth:1, borderColor:'#8C8C8C', borderRadius:5,
-                                alignItems:'center', justifyContent:'center', marginHorizontal:5, marginVertical:10}}>
-                    <AntDesign name="close" size={20} color="#8C8C8C"/>
+                <View style={styles.infoBox}>
+                  <Typography>번호: </Typography>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="' - '를 제외하고 입력해주세요"
+                    value={userPhone === undefined ? '미정' : userPhone}
+                    onChangeText={onChangeUserPhone}
+                  /> 
+                </View>
+                <View style={styles.infoBox}>
+                  <Typography>직분: </Typography>
+                  <View style={[styles.input, {flexDirection:'row', justifyContent:'space-between', alignItems:'center'}]}>
+                    <SelectDropdown
+                      data={optionsDuty}
+                      defaultValue={userDuty === undefined ? '미정' : userDuty}
+                      onSelect={(selectedItem, index) => {
+                        selectedItem !== '선택' && setUserDuty(selectedItem);
+                      }}
+                      defaultButtonText={optionsDuty[0]}
+                      buttonStyle={{width:'100%', height:50, backgroundColor:'#fff'}}
+                      buttonTextStyle={{fontSize:16}}
+                      dropdownStyle={{width:250, borderRadius:10}}
+                      rowStyle={{ width:250, height: 60}}
+                      rowTextStyle={{fontSize:16}}
+                    />
+                    <AntDesign name='down' size={12} color='#8C8C8C' style={{position:'absolute', right:30}}/>
                   </View>
-                </TouchableOpacity>
-              </View>
-              :
+                </View>
+                <View style={{height:100, justifyContent:'flex-end'}}>
+                  <ButtonBox leftText='취소' leftFunction={profileToggleModal} rightText='변경' rightFunction={changeProfile} />
+                </View>
+            </View>
+          </Modal>
+
+          <View style={styles.infoBox}>
+            <View style={styles.infoTextBox}>
+              <Typography marginBottom={15} >
+                <FontAwesome5 name="cross" size={16} color="#000"/>  계정: {userAccount}
+              </Typography>
+              <Typography marginBottom={15} >
+                <FontAwesome5 name="cross" size={16} color="#000"/>  이름: {userName}
+              </Typography>
+              <Typography marginBottom={15} >
+                <FontAwesome5 name="cross" size={16} color="#000"/>  번호: {userPhone === undefined || userPhone === null || userPhone === "" ?'미정' : userPhone}
+              </Typography>
+              <Typography marginBottom={15} >
+                <FontAwesome5 name="cross" size={16} color="#000"/>  교회: {userChurch === undefined || userChurch === null || userChurch === "" ? '미정' : userChurch}
+              </Typography>
+              <Typography marginBottom={15} >
+                <FontAwesome5 name="cross" size={16} color="#000"/>  직분: {userDuty === undefined || userDuty === null || userDuty === "" ? '미정' : userDuty}
+              </Typography>
+              <Typography marginBottom={5} >
+                <FontAwesome5 name="cross" size={16} color="#000"/>  로그인 방식: {userURL}
+              </Typography>
+            </View>
+          </View>
+        </View>
+
+
+        <Divider height={2}/>
+
+        <View style={styles.section}>
+          <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+            <Typography fontSize={18} fontWeightIdx={1} marginBottom={10}>프로필사진</Typography>
+            {
+              userimage !== '' && 
               <>
               {
-                imageLoading ?
-                <View style={{position:'absolute', alignItems:'center', justifyContent:'center'}}>
-                  <View style={{width:120, height:150}}>
-                    <Loading />
-                  </View>
-                </View>
-                :
-                <TouchableOpacity
-                  onPress={showPhoto}
+                images.length === 0
+                ?
+                <TouchableOpacity 
+                  style={{borderWidth:1, borderColor:'#BDBDBD', padding:5, borderRadius:5}}
+                  onPress={alertChangePhoto}
                 >
-                  <View style={{width:120, height:150, borderWidth:1, borderColor:'#8C8C8C', borderRadius:5,
-                                alignItems:'center', justifyContent:'center', marginHorizontal:5, marginVertical:10}}>
-                    <Entypo name="plus" size={20} color="#8C8C8C"/>
-                  </View>
+                <Typography fontSize={14} color='#8C8C8C'>사진 변경하기</Typography>
+                </TouchableOpacity>
+                :
+                <TouchableOpacity 
+                  style={{borderWidth:1, borderColor:'#FF0000', padding:5, borderRadius:5}}
+                  onPress={handleChangeImage}
+                >
+                <Typography fontSize={14} color='#FF0000'>변경완료</Typography>
                 </TouchableOpacity>
               }
               </>
             }
-          </>
-        }
-      </View>
+          </View>
+          {
+            userimage !== '' && images.length === 0
+            ?
+            <View style={{width:120, height:150, margin:5}}>
+              <Image style={{width:'100%', height:'100%', resizeMode:'cover', borderRadius:10}} 
+                source={{ uri: `${MainImageURL}/images/userimage/${userimage}`}}/>
+            </View>
+            :
+            <>
+              { images.length > 0
+                ? 
+                <View style={{flexDirection:'row'}}>
+                  <View style={{ width: 120, height: 150, margin: 5 }}>
+                    <Image source={{ uri: images[0].uri }} style={{ width: '100%', height: '100%', borderRadius:10 }} />
+                  </View>
+                  <TouchableOpacity
+                    onPress={()=>{setImages([]); setUserImage('')}}
+                  >
+                    <View style={{width:30, height:30, borderWidth:1, borderColor:'#8C8C8C', borderRadius:5,
+                                  alignItems:'center', justifyContent:'center', marginHorizontal:5, marginVertical:10}}>
+                      <AntDesign name="close" size={20} color="#8C8C8C"/>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+                :
+                <>
+                {
+                  imageLoading ?
+                  <View style={{position:'absolute', alignItems:'center', justifyContent:'center'}}>
+                    <View style={{width:120, height:150}}>
+                      <Loading />
+                    </View>
+                  </View>
+                  :
+                  <TouchableOpacity
+                    onPress={showPhoto}
+                  >
+                    <View style={{width:120, height:150, borderWidth:1, borderColor:'#8C8C8C', borderRadius:5,
+                                  alignItems:'center', justifyContent:'center', marginHorizontal:5, marginVertical:10}}>
+                      <Entypo name="plus" size={20} color="#8C8C8C"/>
+                    </View>
+                  </TouchableOpacity>
+                }
+                </>
+              }
+            </>
+          }
+        </View>
 
-      <Divider height={2}/>
+        <Divider height={2}/>
 
-      <View style={styles.section}>
-        <Typography fontSize={18} marginBottom={10} fontWeightIdx={1}>기타</Typography>
-        <TouchableOpacity style={styles.bottomButton} onPress={()=>{
-            props.navigation.navigate('Navi_Notifi', {screen: 'Notice'});
-        }}>
-          <Feather name="clipboard" size={20} color="#000" style={{marginRight:15}}/>
-          <View style={styles.bottomButtonRow}>
-            <Typography color='#555' >공지사항</Typography>
-            <AntDesign name="right" size={15} color="#000" />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomButton} onPress={()=>{
-           props.navigation.navigate("Question");
-        }}>
-          <AntDesign name="questioncircleo" size={20} color="#000" style={{marginRight:15}}/>
-          <View style={styles.bottomButtonRow}>
-            <Typography color='#555' >문의하기</Typography>
-            <AntDesign name="right" size={15} color="#000" />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomButton} onPress={()=>{
-           props.navigation.navigate("Report");
-        }}>
-          <MaterialCommunityIcons name="bullhorn-variant-outline" size={20} color="#000" style={{marginRight:15}}/>
-          <View style={styles.bottomButtonRow}>
-            <Typography color='#555' >신고하기</Typography>
-            <AntDesign name="right" size={15} color="#000" />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomButton} onPress={()=>{
-           props.navigation.navigate("Advertising");
-        }}>
-          <MaterialCommunityIcons name="advertisements" size={20} color="#000" style={{marginRight:13}}/>
-          <View style={styles.bottomButtonRow}>
-            <Typography color='#555' >광고 및 제휴</Typography>
-            <AntDesign name="right" size={15} color="#000" />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomButton} onPress={()=>{
-          props.navigation.navigate("Policy");
-        }}>
-          <MaterialIcons name="policy" size={20} color="#000" style={{marginRight:13}}/>
-          <View style={styles.bottomButtonRow}>
-            <Typography color='#555' >약관 및 정책</Typography>
-            <AntDesign name="right" size={15} color="#000" />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomButton} onPress={()=>{
-          props.navigation.navigate("PersonInfo");
-        }}>
-          <Entypo name="info" size={20} color="#000" style={{marginRight:12}}/>
-          <View style={styles.bottomButtonRow}>
-            <Typography color='#555' >개인정보처리방침</Typography>
-            <AntDesign name="right" size={15} color="#000" />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomButton} onPress={()=>{
-          props.navigation.navigate("BusinessInfo");
-        }}>
-          <FontAwesome name="building-o" size={20} color="#000" style={{marginRight:15}}/>
-          <View style={styles.bottomButtonRow}>
-            <Typography color='#555' >사업자정보</Typography>
-            <AntDesign name="right" size={15} color="#000" />
-          </View>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.section}>
+          <Typography fontSize={18} marginBottom={10} fontWeightIdx={1}>기타</Typography>
+          <TouchableOpacity style={styles.bottomButton} onPress={()=>{
+              props.navigation.navigate('Navi_Notifi', {screen: 'Notice'});
+          }}>
+            <Feather name="clipboard" size={20} color="#000" style={{marginRight:15}}/>
+            <View style={styles.bottomButtonRow}>
+              <Typography color='#555' >공지사항</Typography>
+              <AntDesign name="right" size={15} color="#000" />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bottomButton} onPress={()=>{
+            props.navigation.navigate("Question");
+          }}>
+            <AntDesign name="questioncircleo" size={20} color="#000" style={{marginRight:15}}/>
+            <View style={styles.bottomButtonRow}>
+              <Typography color='#555' >문의하기</Typography>
+              <AntDesign name="right" size={15} color="#000" />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bottomButton} onPress={()=>{
+            props.navigation.navigate("Report");
+          }}>
+            <MaterialCommunityIcons name="bullhorn-variant-outline" size={20} color="#000" style={{marginRight:15}}/>
+            <View style={styles.bottomButtonRow}>
+              <Typography color='#555' >신고하기</Typography>
+              <AntDesign name="right" size={15} color="#000" />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bottomButton} onPress={()=>{
+            props.navigation.navigate("Advertising");
+          }}>
+            <MaterialCommunityIcons name="advertisements" size={20} color="#000" style={{marginRight:13}}/>
+            <View style={styles.bottomButtonRow}>
+              <Typography color='#555' >광고 및 제휴</Typography>
+              <AntDesign name="right" size={15} color="#000" />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bottomButton} onPress={()=>{
+            props.navigation.navigate("Policy");
+          }}>
+            <MaterialIcons name="policy" size={20} color="#000" style={{marginRight:13}}/>
+            <View style={styles.bottomButtonRow}>
+              <Typography color='#555' >약관 및 정책</Typography>
+              <AntDesign name="right" size={15} color="#000" />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bottomButton} onPress={()=>{
+            props.navigation.navigate("PersonInfo");
+          }}>
+            <Entypo name="info" size={20} color="#000" style={{marginRight:12}}/>
+            <View style={styles.bottomButtonRow}>
+              <Typography color='#555' >개인정보처리방침</Typography>
+              <AntDesign name="right" size={15} color="#000" />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bottomButton} onPress={()=>{
+            props.navigation.navigate("BusinessInfo");
+          }}>
+            <FontAwesome name="building-o" size={20} color="#000" style={{marginRight:15}}/>
+            <View style={styles.bottomButtonRow}>
+              <Typography color='#555' >사업자정보</Typography>
+              <AntDesign name="right" size={15} color="#000" />
+            </View>
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.logoutContainer}>
+        <View style={styles.logoutContainer}>
+          <TouchableOpacity
+            hitSlop={{ top: 15, bottom: 15 }}
+            onPress={handleLogout}
+            style={styles.logoutButton}
+          >
+            <Typography color='#8C8C8C'>로그아웃</Typography>
+          </TouchableOpacity> 
+        </View>
+
         <TouchableOpacity
           hitSlop={{ top: 15, bottom: 15 }}
-          onPress={handleLogout}
-          style={styles.logoutButton}
+          style={styles.deleteAccountContainer}
+          onPress={deleteAccount}
         >
-          <Typography color='#8C8C8C'>로그아웃</Typography>
+          <View style={{padding:5, borderWidth:1, borderColor:'#EAEAEA', borderRadius:5}}>
+            <Typography fontSize={10} fontWeightIdx={1} color='#8C8C8C'>회원탈퇴를 하시려면 여기를 눌러주세요</Typography>
+          </View>
         </TouchableOpacity> 
-      </View>
 
-      <TouchableOpacity
-        hitSlop={{ top: 15, bottom: 15 }}
-        style={styles.deleteAccountContainer}
-        onPress={deleteAccount}
-      >
-        <View style={{padding:5, borderWidth:1, borderColor:'#EAEAEA', borderRadius:5}}>
-          <Typography fontSize={10} fontWeightIdx={1} color='#8C8C8C'>회원탈퇴를 하시려면 여기를 눌러주세요</Typography>
+        <View style={{marginBottom: 30, alignItems:'flex-end', marginRight:20}}>
+                                      {/* MainURL확인하기 & splash.tsx & result.tsx(Login) 확인하기 */}
+          <Typography fontSize={10} color='#8C8C8C'>버전정보 : {MainVersion}</Typography>
+        
         </View>
-      </TouchableOpacity> 
 
-      <View style={{marginBottom: 30, alignItems:'flex-end', marginRight:20}}>
-                                     {/* MainURL확인하기 & splash.tsx & result.tsx(Login) 확인하기 */}
-        <Typography fontSize={10} color='#8C8C8C'>버전정보 : {MainVersion}</Typography>
-      
-      </View>
-
-    </ScrollView>
-   
+      </ScrollView>
+    }
+    
     <View style={ isProfileModalVisible ? styles.modalBackCover :  { display: 'none'}}></View>
     </View>
   )

@@ -141,14 +141,14 @@ export default function ListDetail(props : any) {
    };
 
   const alertImageToggleModal = (item:any) => { 
-    Alert.alert('이 버튼은 담당 목회자에게만 노출되며, 사진을 대신 등록하는 것은, 최초 1회만 가능합니다.', `사진을 변경하시겠습니까?`, [
+    Alert.alert('이 버튼은, 가입시 담당 목회자가 프로필을 수정하는 것에 동의한 분들에 한하여, 담당 목회자에게만 노출됩니다. 또한 사진을 대신 등록하는 것은, 최초 1회만 가능합니다.', `사진을 변경하시겠습니까?`, [
       { text: '취소', onPress: () => { return }},
       { text: '확인', onPress: () => { data.userChurchKey === '11' ? Alert.alert('테스트입니다.') : imageToggleModal() } }
     ]);
   }
 
   const alertProfileToggleModal = (item:any) => { 
-    Alert.alert('이 버튼은 담당 목회자에게만 노출됩니다.', `프로필 정보를 변경하시겠습니까?`, [
+    Alert.alert('이 버튼은, 가입시 담당 목회자가 프로필을 수정하는 것에 동의한 분들에 한하여, 담당 목회자에게만 노출됩니다.', `프로필 정보를 변경하시겠습니까?`, [
       { text: '취소', onPress: () => { return }},
       { text: '확인', onPress: () => { data.userChurchKey === '11' ? Alert.alert('테스트입니다.') : profileToggleModal() } }
     ]);
@@ -173,7 +173,7 @@ export default function ListDetail(props : any) {
       <View style={styles.section}>
 
         {
-          sort === 'church' && (data.userImage === null || data.userImage === "") &&
+          sort === 'church' && (data.userImage === null || data.userImage === "") && data.profileSet === 'church' &&
           <TouchableOpacity style={{position:'absolute', top:10, right:10, padding:15}}
             onPress={alertImageToggleModal}
             >
@@ -271,7 +271,7 @@ export default function ListDetail(props : any) {
       <View style={{}}>
 
         {
-          sort === 'church' &&
+          sort === 'church' && data.profileSet === 'church' &&
           <TouchableOpacity style={{position:'absolute', top:-15, right:10, padding:15, zIndex:9}}
             hitSlop={{ top: 15, bottom: 15 }}
             onPress={alertProfileToggleModal}

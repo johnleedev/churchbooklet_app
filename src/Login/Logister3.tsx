@@ -29,7 +29,7 @@ export default function Logister3 (props : any) {
   const [imageNames, setImageNames] = useState('');
   const [check, setCheck] = useState<boolean>(false);
 
-  const optionsDuty = ["성도", "주일학교", "집사", "안수집사", "권사", "장로", "선교사", "전도사", "목사"];
+  const optionsDuty = ["성도", "주일학교", "집사", "안수집사", "권사", "장로", "선교사", "전도사", "목사", "사모"];
 
   const onChangeUserPhone = (text : any) => {
     const userPhoneRegex = /^[0-9]*$/
@@ -96,7 +96,7 @@ export default function Logister3 (props : any) {
           if (res.data === userLoginData.userAccount) {
             Alert.alert('회원가입이 완료되었습니다!');
             AsyncSetItem(userLoginData.refreshToken, userLoginData.userAccount, userLoginData.userName,
-                          userLoginData.userChurch, userLoginData.userChurchKey, userDuty);
+                          userLoginData.userChurch, JSON.stringify(userLoginData.userChurchKey), userDuty);
             props.navigation.navigate('Result');
           } else {
             Alert.alert('다시 시도해 주세요.');
@@ -113,7 +113,7 @@ export default function Logister3 (props : any) {
           if (res.data === userLoginData.userAccount) {
             Alert.alert('회원가입이 완료되었습니다!');
             AsyncSetItem(userLoginData.refreshToken, userLoginData.userAccount, userLoginData.userName, 
-                        userLoginData.userChurch, userLoginData.userChurchKey, userDuty);
+                        userLoginData.userChurch, JSON.stringify(userLoginData.userChurchKey), userDuty);
             props.navigation.navigate('Result');
           } else {
             Alert.alert('다시 시도해 주세요.');

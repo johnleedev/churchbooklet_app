@@ -16,9 +16,17 @@ function DeleteAccount (props: any) {
 
   // AsyncGetData
   const [asyncGetData, setAsyncGetData] = useState<any>({});
+  const [userAccount, setUserAccount] = useState('');
+  const [userImage, setUserImage] = useState('');
   const asyncFetchData = async () => {
     try {
       const data = await AsyncGetItem();
+      if (data) {
+        await axios.get(`${MainURL}/mypage/getprofile/${data.userAccount}`).then((res) => {
+          setUserAccount(res.data[0]?.userAccount);
+          setUserImage(res.data[0]?.userImage);
+        });
+      }
       setAsyncGetData(data);
     } catch (error) {
       console.error(error);
@@ -40,21 +48,27 @@ function DeleteAccount (props: any) {
         { text: '탈퇴', onPress: () => deleteAccount() }
       ]);
     } else {
-      Alert.alert('확인 버튼을 눌러야 힙니다.')
+      Alert.alert('위 확인 버튼에 체크해주세요.')
     }
     
   };
+ 
 
   const deleteAccount = async () => {
     axios
       .post(`${MainURL}/login/deleteaccount`, {
-        userAccount: asyncGetData.userAccount, 
-        userName: asyncGetData.userName, 
+        userAccount: userAccount, 
+        userImage: userImage
       })
       .then((res) => {
         if (res.data) {
           Alert.alert('탈퇴 되었습니다.');
-          handleLogout();
+          AsyncStorage.removeItem('token');
+          AsyncStorage.removeItem('account');
+          AsyncStorage.removeItem('name');
+          AsyncStorage.removeItem('church');
+          AsyncStorage.removeItem('churchkey');
+          AsyncStorage.removeItem('duty');
           props.navigation.replace("Navi_Login");
         } else {
           Alert.alert('다시 시도해주세요.');
@@ -64,17 +78,6 @@ function DeleteAccount (props: any) {
       .catch((error) => {
         console.error(error);
       });
-  };
-
-  const handleLogout = () => {
-    AsyncStorage.removeItem('token');
-    AsyncStorage.removeItem('account');
-    AsyncStorage.removeItem('name');
-    AsyncStorage.removeItem('phone');
-    AsyncStorage.removeItem('church');
-    AsyncStorage.removeItem('churchkey');
-    AsyncStorage.removeItem('duty');
-    AsyncStorage.removeItem('URL');
   };
 
   const handleClose = () => {

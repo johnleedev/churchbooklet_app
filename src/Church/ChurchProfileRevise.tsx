@@ -1,34 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, ScrollView, Alert, Platform, Image, TouchableOpacity } from 'react-native';
-import {launchImageLibrary, ImageLibraryOptions, Asset} from 'react-native-image-picker';
+import { StyleSheet, View, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
 import axios from 'axios';
 import MainURL from "../../MainURL";
-import { Typography } from '../Components/Typography';
 import SelectDropdown from 'react-native-select-dropdown'
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import Entypo from 'react-native-vector-icons/Entypo';
 import { Divider } from '../Components/Divider';
 import { ButtonBox } from '../Components/ButtonBox';
 import { SubTitle } from '../Components/SubTitle';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Loading from '../Components/Loading';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import { Typography } from '../Components/Typography';
+
+export default function ChurchProfileRevise (props : any) {
+
+  const churchData = props.route.params.data;
+  const userAccount = props.route.params.userAccount;
+
+  const [churchName, setChurchName] = useState(churchData.churchName);
+  const [religiousbody, setReligiousbody] = useState(churchData.religiousbody);
+  const [churchAddressCity, setChurchAddressCity] = useState(churchData.churchAddressCity);
+  const [churchAddressCounty, setChurchAddressCounty] = useState(churchData.churchAddressCounty);
+  const [churchAddressRest, setChurchAddressRest] = useState(churchData.churchAddressRest);
+  const [churchPhone, setChurchPhone] = useState(churchData.churchPhone);
+  const [churchPastor, setChurchPastor] = useState(churchData.churchPastor);
 
 
-export default function ChurchInfoInput(props : any) {
 
-  const asyncGetData = props.route.params.asyncGetData;
-
-  const [churchName, setChurchName] = useState(asyncGetData.userChurch);
-  const [religiousbody, setReligiousbody] = useState('');
-  const [churchAddressCity, setChurchAddressCity] = useState('');
-  const [churchAddressCounty, setChurchAddressCounty] = useState('');
-  const [churchAddressRest, setChurchAddressRest] = useState('');
-  const [churchPhone, setChurchPhone] = useState('');
-  const [churchPastor, setChurchPastor] = useState(asyncGetData.userName);
-  const [images, setImages] = useState<Asset[]>([]);
-  const [imageNames, setImageNames] = useState('');
-  
-  
   // 교단선택 ----------------------------------------------------------------------
   const optionReligiousbody = [
     "선택", "구세군대한본영", "기독교대한감리회", "기독교대한성결교회", "기독교대한하나님의성회", "기독교한국침례회", "대한기독교나사렛성결회",
@@ -47,6 +42,8 @@ export default function ChurchInfoInput(props : any) {
   const [optionsCities, setOptionsCities] = useState([]);
   const [counties, getCounties] = useState<ResidenceProps[]>([]);
   const [optionsCounties, setOptionsCounties] = useState([]);
+
+  
 
   const handleGetCities = async () => {
     try{
@@ -97,142 +94,45 @@ export default function ChurchInfoInput(props : any) {
   };
 
 
-  // 사진 첨부 함수 -----------------------------------------------------------------
-  const [imageLoading, setImageLoading] = useState<boolean>(false);
-  const showPhoto = async ()=> {
-    setImageLoading(true);
-    const option: ImageLibraryOptions = {
-        mediaType : "photo",
-        selectionLimit : 1,
-        maxWidth: 300,
-        maxHeight: 300,
-        includeBase64: Platform.OS === 'android'
-    }
-    await launchImageLibrary(option, async(res) => {
-      if(res.didCancel) Alert.alert('취소')
-      else if(res.errorMessage) Alert.alert('Error : '+ res.errorMessage)
-      else {
-        const uris: Asset[] = res.assets || [];
-        const copy = `${asyncGetData.userAccount}_${uris[0].fileName}`
-        uris[0].fileName = copy
-        setImages(uris);
-        setImageNames(copy);
-        setImageLoading(false);
-      }
-    }) 
-  }
-
-  // 교회 등록 하기 함수 -----------------------------------------------------------------
-  const createPost = async () => {
-
-    const getParams = {
-      userAccount : asyncGetData.userAccount,
+  const handleChurchRevise = () => {
+    axios
+    .post(`${MainURL}/churchs/churchinforevise`, {
+      userAccount : userAccount,
+      churchKey : churchData.id,
       churchName : churchName,
       religiousbody : religiousbody,
       churchAddressCity : churchAddressCity, 
       churchAddressCounty : churchAddressCounty,
       churchAddressRest: churchAddressRest,
       churchPhone: churchPhone,
-      churchPastor : churchPastor,
-      churchImage : imageNames,
-    };
-
-    try {
-      const formData = new FormData();
-      // 사진 포함
-      if (images.length > 0) {
-        images.forEach((image) => {
-          formData.append("img", {
-            name: image.fileName,
-            type: image.type,
-            uri: image.uri,
-          });
-        });
-        await axios.post(`${MainURL}/churchs/registerwithimage`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          params: getParams,
-        }).then(async (res) => {
-          if (res.data.success === true) {
-            await AsyncStorage.setItem('church', churchName);
-            await AsyncStorage.setItem('churchkey', JSON.stringify(res.data.churchKey));
-            Alert.alert("입력되었습니다.");
-            props.navigation.replace('ChurchMain');
-          } else {
-            Alert.alert("다시 시도하세요.");
-          }
-        })
-        .catch(() => {
-          console.log('실패함');
-        });
+      churchPastor : churchPastor
+    })
+    .then((res) => {
+      if (res.data === true) {
+        Alert.alert('변경되었습니다!');
       } else {
-        // 사진 미포함
-        await axios.post(`${MainURL}/churchs/registerwithoutimage`, getParams)
-        .then(async (res) => {
-          if (res.data.success === true) {
-            await AsyncStorage.setItem('church', churchName);
-            await AsyncStorage.setItem('churchkey', JSON.stringify(res.data.churchKey));
-            Alert.alert("입력되었습니다.");
-            props.navigation.replace('ChurchMain');
-          } else {
-            Alert.alert("다시 시도하세요.");
-          }
-        })
-        .catch(() => {
-          console.log('실패함');
-        });
+        Alert.alert('다시 시도해 주세요.');
       }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+  }; 
 
-    } catch (error) {
-      Alert.alert('다시 시도해 주세요.');
-    }
-   
-  };
+  
 
-  const alertRegister = () => { 
-    if (churchName && religiousbody && churchAddressCity && churchAddressCounty && churchAddressRest && churchPhone) {
-      Alert.alert('다음 내용으로 등록하시겠습니까?',
-`
-교회명 : ${churchName}
-교단 : ${religiousbody}
-교회주소 : ${churchAddressCity} ${churchAddressCounty} ${churchAddressRest}
-교회번호 : ${churchPhone}
-담임목사 : ${churchPastor}
 
-`, [
-      { text: '취소', onPress: () => { return }},
-      { text: '확인', onPress: () => createPost() }
-    ]);
-    } else {
-      Alert.alert('선택되지 않은 항목이 있거나, 빈 항목이 있습니다.')
-    }
-    
-  }
-
-  const closeDetail = () => {
-    props.navigation.goBack();
-  };
-
+  
   return (
-    optionsCities.length === 0
-    ?  (
-    <View style={{flex:1, width:'100%', height:'100%'}}>
-      <Loading />
-    </View>
-    ) : (
     <View style={styles.container}>
-      
-      
+     
       {/* title */}
-      <SubTitle title='교회정보입력' navigation={props.navigation}/>
+      <SubTitle title='교회 정보 수정하기' navigation={props.navigation}/>
                 
       <Divider height={2} />
 
-      <ScrollView style={styles.section}>
-
-
-        <View style={{marginVertical:5}}>
+      <ScrollView style={[styles.section, {flex:1}]}>
+       <View style={{marginVertical:5}}>
           <Typography color='#8C8C8C' fontWeightIdx={1}>교회명 <Typography color='#E94A4A'>*</Typography></Typography>
           <TextInput
             style={[styles.input, {width: '100%', marginBottom:30}]}
@@ -252,7 +152,7 @@ export default function ChurchInfoInput(props : any) {
               onSelect={(selectedItem, index) => {
                 setReligiousbody(selectedItem);
               }}
-              defaultButtonText={optionReligiousbody[0]}
+              defaultButtonText={religiousbody}
               buttonStyle={{width:'85%', height:30, backgroundColor:'#fff'}}
               buttonTextStyle={{fontSize:16}}
               dropdownStyle={{width:250, borderRadius:10}}
@@ -272,9 +172,8 @@ export default function ChurchInfoInput(props : any) {
               onSelect={(selectedItem, index) => {
                 handleCitiesChange(selectedItem);
                 setChurchAddressCity(selectedItem);
-                setChurchAddressCounty('');
               }}
-              defaultButtonText={optionsCities[0]}
+              defaultButtonText={churchAddressCity}
               buttonStyle={{width:'85%', height:30, backgroundColor:'#fff'}}
               buttonTextStyle={{fontSize:16}}
               dropdownStyle={{width:250, borderRadius:10}}
@@ -290,7 +189,7 @@ export default function ChurchInfoInput(props : any) {
               onSelect={(selectedItem, index) => {
                 setChurchAddressCounty(selectedItem);
               }}
-              defaultButtonText={optionsCounties[0] === undefined || optionsCounties[0] === "" ? '시/도 를 선택해주세요' : optionsCounties[0]}
+              defaultButtonText={churchAddressCounty === undefined ? '시/도 를 선택해주세요' : churchAddressCounty}
               buttonStyle={{width:'85%', height:30, backgroundColor:'#fff'}}
               buttonTextStyle={{fontSize:16}}
               dropdownStyle={{width:250, borderRadius:10}}
@@ -298,10 +197,6 @@ export default function ChurchInfoInput(props : any) {
               rowTextStyle={{fontSize:16}}
             />
             <AntDesign name='down' size={12} color='#8C8C8C'/>
-          </View>
-          <View style={{paddingLeft:10, marginTop:10}}>
-            <Typography color='#5D5D5D' marginBottom={5}>시/도: {churchAddressCity}</Typography>
-            <Typography color='#5D5D5D'>구/군: {churchAddressCounty}</Typography>
           </View>
           <TextInput
             style={[styles.input, {width: '100%', marginBottom:30}]}
@@ -333,57 +228,14 @@ export default function ChurchInfoInput(props : any) {
             value={churchPastor}
           />
         </View>
-
-        <View style={{marginVertical:5, marginBottom:30}}>
-          {/* 사진 첨부 */}
-          <Typography color='#8C8C8C' fontWeightIdx={1}>교회 대표 사진 <Typography color='#E94A4A'>*</Typography></Typography>
-          <View style={{alignItems:'center'}}>
-            { images.length > 0
-              ? 
-              <View style={{flexDirection:'row'}}>
-                <View style={{ width: 300, height: 200, margin: 5 }}>
-                  <Image source={{ uri: images[0].uri }} style={{ width: '100%', height: '100%', borderRadius:10 }} />
-                </View>
-                <TouchableOpacity
-                  onPress={()=>{setImages([]); setImageNames('')}}
-                >
-                  <View style={{width:30, height:30, borderWidth:1, borderColor:'#8C8C8C', borderRadius:5,
-                                alignItems:'center', justifyContent:'center', marginHorizontal:5, marginVertical:10}}>
-                    <AntDesign name="close" size={20} color="#8C8C8C"/>
-                  </View>
-                </TouchableOpacity>
-              </View>
-              :
-              <>
-              {
-                imageLoading ?
-                <View style={{position:'absolute', alignItems:'center', justifyContent:'center'}}>
-                  <View style={{width:300, height:200}}>
-                    <Loading />
-                  </View>
-                </View>
-                :
-                <TouchableOpacity
-                  onPress={showPhoto}
-                >
-                  <View style={{width:300, height:200, borderWidth:1, borderColor:'#8C8C8C', borderRadius:5,
-                                alignItems:'center', justifyContent:'center', marginHorizontal:5, marginVertical:10}}>
-                    <Entypo name="plus" size={20} color="#8C8C8C"/>
-                  </View>
-                </TouchableOpacity>
-              }
-              </>
-            }
-          </View>
-        </View>
-        
-        <ButtonBox leftFunction={closeDetail} leftText='취소' rightFunction={alertRegister} rightText='등록하기'/>
+      
+        <ButtonBox leftText='뒤로가기' leftFunction={()=>{props.navigation.replace('ChurchMain');}} rightText='완료' rightFunction={handleChurchRevise} />
         <View style={{height:100}}></View>
+
       </ScrollView>
-     
+
     </View> 
-    )
-  );
+   );
 }
 
 
@@ -403,8 +255,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
     borderRadius: 5,
-    color: '#333',
-    fontSize:16
+    color: '#333'
   },  
   selectDropdown : {
     borderWidth:1, 

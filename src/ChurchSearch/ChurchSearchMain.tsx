@@ -86,18 +86,19 @@ export default function ChurchSearchMain(props : any) {
   const [selectedCity, setSelectedCity] = useState('서울특별시');
   
   const religiousbodys = [
-    {name: `구세군${'\n'}대한본영`, image: "구세군대한본영.jpg"},
-    {name: `기독교대한${'\n'}감리회`, image: "기독교대한감리회.jpg"},
-    {name: `기독교대한${'\n'}성결교회`, image: "기독교대한성결교회.jpg"},
-    {name: `기독교대한${'\n'}하나님의성회`, image: "기독교대한하나님의성회.jpg"},
-    {name: `기독교한국${'\n'}침례회`, image: "기독교한국침례회.jpg"},
-    {name: `대한기독교${'\n'}나사렛성결회`, image: "대한기독교나사렛성결회.jpg"},
-    {name: `대한예수교${'\n'}장로회고신`, image: "대한예수교장로회고신.jpg"},
-    {name: `대한예수교${'\n'}장로회통합`, image: "대한예수교장로회통합.jpg"},
-    {name: `대한예수교${'\n'}장로회합동`, image: "대한예수교장로회합동.jpg"},
-    {name: `예수교대한${'\n'}성결교회`, image: "예수교대한성결교회.jpg"},
-    {name: `한국기독교${'\n'}장로회`, image: "한국기독교장로회.jpg"},
-    {name: `기타교단`, image: "기타교단.jpg"}
+    {name: `구세군${'\n'}대한본영`, url: `구세군대한본영`,  image: "구세군대한본영.jpg"},
+    {name: `기독교대한${'\n'}감리회`, url: `기독교대한감리회`, image: "기독교대한감리회.jpg"},
+    {name: `기독교대한${'\n'}성결교회`, url: `기독교대한성결교회`, image: "기독교대한성결교회.jpg"},
+    {name: `기독교대한${'\n'}하나님의성회`, url: `기독교대한하나님의성회`, image: "기독교대한하나님의성회.jpg"},
+    {name: `기독교한국${'\n'}침례회`, url: `기독교한국침례회`, image: "기독교한국침례회.jpg"},
+    {name: `대한기독교${'\n'}나사렛성결회`, url: `대한기독교나사렛성결회`, image: "대한기독교나사렛성결회.jpg"},
+    {name: `대한예수교${'\n'}장로회고신`, url: `대한예수교장로회(고신)`, image: "대한예수교장로회고신.jpg"},
+    {name: `대한예수교${'\n'}장로회통합`, url: `대한예수교장로회(통합)`, image: "대한예수교장로회통합.jpg"},
+    {name: `대한예수교${'\n'}장로회합동`, url: `대한예수교장로회(합동)`, image: "대한예수교장로회합동.jpg"},
+    {name: `대한예수교${'\n'}장로회기타`, url: `대한예수교장로회(기타)`, image: "기타교단.jpg"},
+    {name: `예수교대한${'\n'}성결교회`, url: `예수교대한성결교회`, image: "예수교대한성결교회.jpg"},
+    {name: `한국기독교${'\n'}장로회`, url: `한국기독교장로회`, image: "한국기독교장로회.jpg"},
+    {name: `기타교단`, url: `기타교단`, image: "기타교단.jpg"}
   ]
   
   const handleGetCities = async () => {
@@ -139,7 +140,6 @@ export default function ChurchSearchMain(props : any) {
       }
     });
   };
-
 
 
   const fetchSelectedReligiousbody = async (text: string) => {
@@ -276,7 +276,7 @@ export default function ChurchSearchMain(props : any) {
                                   flexDirection:'row', borderWidth:1, borderColor:"#BDBDBD", borderRadius:10}}
                           onPress={()=>{
                             setIsSelectedButton(true);
-                            fetchSelectedReligiousbody(item);
+                            fetchSelectedReligiousbody(item.url);
                           }}
                         >
                           <View style={{width:'30%', alignItems:'center', justifyContent:"center"}}>

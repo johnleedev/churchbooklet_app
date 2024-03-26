@@ -11,6 +11,7 @@ import { Typography } from '../Components/Typography';
 import { Title } from '../Components/Title';
 import { Divider } from '../Components/Divider';
 import DateFormmating from '../Components/DateFormmating';
+import { SubTitle } from '../Components/SubTitle';
 
 export default function SuggestionBoard (props : any) {
 
@@ -73,7 +74,7 @@ export default function SuggestionBoard (props : any) {
   };
 
   const [showAllPosts, setShowAllPosts] = useState(false);
-  const suggestionToShow = showAllPosts ? suggestionPosts.slice(0, 10) : suggestionPosts.slice(0, 3);
+  const suggestionToShow = showAllPosts ? suggestionPosts.slice(0, 10) : suggestionPosts.slice(0, 5);
 
   const deleteSuggestion = (data : any) => {
     axios
@@ -94,97 +95,95 @@ export default function SuggestionBoard (props : any) {
 
   return (
     <View style={styles.container}>
-      <Title title='건의하기' enTitle='Suggestion'/>
+      <SubTitle title='문의하기' enTitle='Question' navigation={props.navigation}/>
+      
       <View style={styles.section}>
-      <View style={[styles.addSuggestionContainer]}>
-        <View style={styles.addTitleBox}>
-          <Typography marginBottom={4} color='#8C8C8C' fontSize={12}>
-            '교회수첩' 어플 운영에 관한 제안을, 자유롭게 건의해주세요.
-          </Typography>
-        </View>
-        <TextInput
-          style={[styles.addSuggestionInput]}
-          placeholder="글을 입력하세요"
-          placeholderTextColor="gray"
-          value={suggestionContent}
-          onChangeText={setSuggestionContent}
-        />
-        <View style={{flexDirection:'row', justifyContent:'flex-end', marginRight:5}}>
-          <View style={styles.addTitleTextbox}>
-            <Typography color='#8C8C8C' fontSize={12} >{asyncGetData.userName} </Typography>
-            <Typography color='#8C8C8C' fontSize={12} >{asyncGetData.userChurch}</Typography>
+        <ScrollView>
+          <View style={styles.addTitleBox}>
+            <Typography marginBottom={4} color='#8C8C8C' fontSize={12}>
+              '교회수첩' 어플에 관해, 자유롭게 문의해주세요.
+            </Typography>
           </View>
-          <TouchableOpacity
-            style={styles.addSuggestionButton}
-            onPress={addSuggestion}
-          > 
-            <Entypo name="pencil" size={15} color="#fff"/>
-          </TouchableOpacity>
-        </View>
-        <Divider height={2} marginVertical={15}/>
-        <Typography marginBottom={20} color='#8C8C8C' fontSize={12}>* 건의 목록 (최근 5개의 게시글만 보여집니다.)</Typography>
-        {
-          suggestionToShow.slice(0,5).map((item:any, index:any)=>{
+          <TextInput
+            style={[styles.addSuggestionInput]}
+            placeholder="글을 입력하세요"
+            placeholderTextColor="gray"
+            value={suggestionContent}
+            onChangeText={setSuggestionContent}
+          />
+          <View style={{flexDirection:'row', justifyContent:'flex-end', marginRight:5}}>
+            <View style={styles.addTitleTextbox}>
+              <Typography color='#8C8C8C' fontSize={12} >{asyncGetData.userName} </Typography>
+              <Typography color='#8C8C8C' fontSize={12} >{asyncGetData.userChurch}</Typography>
+            </View>
+            <TouchableOpacity
+              style={styles.addSuggestionButton}
+              onPress={addSuggestion}
+            > 
+              <Entypo name="pencil" size={15} color="#fff"/>
+            </TouchableOpacity>
+          </View>
+          <Divider height={2} marginVertical={15}/>
+          <Typography marginBottom={20} color='#8C8C8C' fontSize={12}>* 문의 목록 (최근 10개의 게시글만 보여집니다.)</Typography>
+          {
+            suggestionToShow.slice(0,10).map((item:any, index:any)=>{
 
-            const firstCharacter = item.userName.charAt(0);
-            const restOfTheString = 'O'.repeat(item.userName.length - 1);
-            const modifiedName = firstCharacter + restOfTheString;
-
-            return(
-              <View key={index} style={{minHeight:50}}>
-                <Typography marginBottom={10} >{item.content}</Typography>
-                <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                  <Typography color='#8C8C8C' fontSize={12} >{DateFormmating(item.date)}</Typography>
-                  <View style={{flexDirection:'row', marginBottom:5}}>
-                    <Typography color='#8C8C8C' fontSize={12} >{modifiedName} </Typography>
-                    <Typography color='#8C8C8C' fontSize={12} >{item.userChurch}</Typography>
-                  </View>
-                </View>
-                {
-                  item.response &&
-                  <View style={{marginVertical:10, flexDirection:'row'}}>
-                    <MaterialCommunityIcons name='arrow-right-bottom' color='#BDBDBD' size={12} style={{marginRight:5}}/>
-                    <View style={{ width:'90%', flexDirection:'row', flexWrap:'wrap', justifyContent:'space-between'}}>
-                      <Typography  fontSize={14}>{item.response}</Typography>
+              return(
+                <View key={index} style={{minHeight:50}}>
+                  <Typography marginBottom={10} >{item.content}</Typography>
+                  <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+                    <Typography color='#8C8C8C' fontSize={12} >{DateFormmating(item.date)}</Typography>
+                    <View style={{flexDirection:'row', marginBottom:5}}>
+                      <Typography color='#8C8C8C' fontSize={12} >{item.userName} </Typography>
+                      <Typography color='#8C8C8C' fontSize={12} >{item.userChurch === '테스트교회' ? '미정' : item.userChurch}</Typography>
                     </View>
                   </View>
-                }
-                <View style={{alignItems:'flex-end'}}>
-                  <TouchableOpacity
-                    onPress={()=>{
-                      deleteSuggestion(item)
-                    }}
-                  >
-                    { 
-                      asyncGetData.userName === item.userName &&
-                      <Typography color='#8C8C8C' fontSize={12}>
-                        <Text style={{textDecorationLine:'underline'}}>삭제하기</Text>
-                      </Typography>
-                    }
-                    
-                  </TouchableOpacity>
+                  {
+                    item.response &&
+                    <View style={{marginVertical:10, flexDirection:'row'}}>
+                      <MaterialCommunityIcons name='arrow-right-bottom' color='#BDBDBD' size={12} style={{marginRight:5}}/>
+                      <View style={{ width:'90%', flexDirection:'row', flexWrap:'wrap', justifyContent:'space-between'}}>
+                        <Typography  fontSize={14}>{item.response}</Typography>
+                      </View>
+                    </View>
+                  }
+                  <View style={{alignItems:'flex-end'}}>
+                    <TouchableOpacity
+                      onPress={()=>{
+                        deleteSuggestion(item)
+                      }}
+                    >
+                      { 
+                        asyncGetData.userName === item.userName &&
+                        <Typography color='#8C8C8C' fontSize={12}>
+                          <Text style={{textDecorationLine:'underline'}}>삭제하기</Text>
+                        </Typography>
+                      }
+                      
+                    </TouchableOpacity>
+                  </View>
+                  <Divider height={1} marginVertical={10} />
                 </View>
-                <Divider height={1} marginVertical={10} />
+              )
+            })
+          }
+          {
+            !showAllPosts
+            && 
+            <TouchableOpacity
+              style={styles.button} 
+              onPress={()=>{
+                setShowAllPosts(true);
+              }}
+            >
+              <View style={{flexDirection:'row', alignItems:'center'}}>
+                <Typography color='#8C8C8C'  fontSize={14}>더보기 </Typography>
+                <AntDesign name="down" size={16} color="#8C8C8C"/>
               </View>
-            )
-          })
-        }
-        {
-          !showAllPosts
-          && 
-          <TouchableOpacity
-            style={styles.button} 
-            onPress={()=>{
-              setShowAllPosts(true);
-            }}
-          >
-            <View style={{flexDirection:'row', alignItems:'center'}}>
-              <Typography color='#8C8C8C'  fontSize={14}>더보기 </Typography>
-              <AntDesign name="down" size={16} color="#8C8C8C"/>
-            </View>
-          </TouchableOpacity>
-        }
-      </View>
+            </TouchableOpacity>
+          }
+          <View style={{height:150}}></View>
+        </ScrollView>
       </View>
     </View>
   );
@@ -197,10 +196,6 @@ const styles = StyleSheet.create({
   },
   section :{
     padding:20
-  },
-  addSuggestionContainer: {
-    backgroundColor:'#fff',
-    borderRadius: 15
   },
   addTitleBox: {
     marginBottom: 8,

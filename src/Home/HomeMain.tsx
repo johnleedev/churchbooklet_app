@@ -2,20 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Image, Text, TouchableOpacity, ScrollView, 
         Alert, Linking, KeyboardAvoidingView, Platform, RefreshControl, ImageBackground } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+
+
 import { Typography } from '../Components/Typography';
 import AsyncGetItem from '../AsyncGetItem'
 import Swiper from 'react-native-swiper'
 import MainImageURL from "../../MainImageURL";
 import axios from 'axios';
 import MainURL from "../../MainURL";
-import SuggestionBoard from './SuggestionBoard';
 import {checkNotifications, requestNotifications} from 'react-native-permissions';
 import messaging from '@react-native-firebase/messaging';
 import Toast from 'react-native-toast-message';
 import { Divider } from '../Components/Divider';
 import Clipboard from '@react-native-clipboard/clipboard';
 import RegisterBoard from './RegisterBoard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 function HomeMain(props : any) {
 
@@ -102,7 +103,6 @@ function HomeMain(props : any) {
     return unsubscribe
   }, []);
 
-
   return (
     <View style={styles.container}>
       
@@ -160,8 +160,75 @@ function HomeMain(props : any) {
               }
             </Swiper>
           </View>
-     
 
+    
+        <Divider height={5} />
+
+        <View style={{padding:20, alignItems:'center'}}>
+          <Typography fontSize={18} marginBottom={10} fontWeightIdx={1}>NOTICE</Typography>
+          <View style={{width:'100%', padding:15, backgroundColor:'rgba(215, 111, 35, 0.10)', alignItems:'center', marginBottom:10}}>
+            <Typography marginBottom={5}>교회수첩에 오신 여러분들을 환영합니다.</Typography>
+            <Typography marginBottom={5}>앱이 시작되고 한번 꺼졌다가 다시 켜지는 것은</Typography>
+            <Typography marginBottom={5}>오류가 아니라 자동 업데이트 되는 것입니다.</Typography>
+            <Typography marginBottom={5}>그외 다른 불편하신 사항이 있으시면,</Typography>
+            <Typography>아래 문의하기나 카카오채널을 이용해주세요.</Typography>
+          </View>
+          <TouchableOpacity
+            style={{width:250, flexDirection:'row', justifyContent:'space-between', alignItems:'center', 
+                      borderWidth:1, borderRadius:10, borderColor:'#EAEAEA', padding:10, marginBottom:10}}
+            onPress={()=>{
+              Linking.openURL("http://pf.kakao.com/_yUxmWG");
+            }}
+             >
+            <View style={{width:30, alignItems:'center'}}>
+              <Image
+                source={require("../images/login/kakao.png")}
+                style={{width:25, height:25, resizeMode:'contain'}}>
+              </Image>
+            </View>
+            <Typography>카카오채널로 문의하기</Typography>
+            <AntDesign name='right' size={16} color='#333'/>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={()=>{
+              props.navigation.navigate('SuggestionBoard')
+            }}
+            style={{width:250, flexDirection:'row', justifyContent:'space-between', alignItems:'center', 
+                    borderWidth:1, borderRadius:10, borderColor:'#EAEAEA', padding:10}}
+             >
+            <View style={{width:30, alignItems:'center'}}>
+              <AntDesign name='filetext1' size={22} color='#333'/>
+            </View>
+            <Typography>문의하기 게시판</Typography>
+            <AntDesign name='right' size={16} color='#333'/>
+          </TouchableOpacity>
+        </View>
+
+        <Divider height={5} />
+          <View style={{padding:20, alignItems:'center'}}>
+            <Typography fontSize={18} marginBottom={10} fontWeightIdx={1}>교회수첩 사용설명서</Typography>
+            
+            <View style={{width:'100%', flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+              <TouchableOpacity
+                style={{width:'48%', justifyContent:'center', alignItems:'center', 
+                          borderWidth:1, borderRadius:10, borderColor:'#EAEAEA', padding:10,}}
+                onPress={()=>{
+                  props.navigation.navigate("Navi_Notifi", {screen : "AppNoticePastor"})
+                }}
+                >
+                <Typography>담당 목회자용</Typography>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={()=>{
+                  props.navigation.navigate("Navi_Notifi", {screen : "AppNotice"})
+                }}
+                style={{width:'48%', justifyContent:'center', alignItems:'center', 
+                        borderWidth:1, borderRadius:10, borderColor:'#EAEAEA', padding:10}}
+                >
+                <Typography>일반성도용</Typography>
+              </TouchableOpacity>
+            </View>
+          </View>
 
         <Divider height={5} />
 
@@ -170,10 +237,12 @@ function HomeMain(props : any) {
 
         <Divider height={5} />
 
-        {/* 건의하기 게시판 */}
-        <SuggestionBoard/>
-
-       
+        <View style={{padding:20, marginBottom:20}}>
+          <View style={{padding:15, backgroundColor:'rgba(215, 111, 35, 0.10)', alignItems:'center'}}>
+            <Typography marginBottom={10}>교회수첩 후원계좌</Typography>
+            <Typography>676301-04-297651 국민은행 이요한</Typography>
+          </View>
+        </View>      
     
       </ScrollView>
       </KeyboardAvoidingView>

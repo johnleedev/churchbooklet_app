@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, ScrollView, Alert, TouchableOpacity, Linking,
-          NativeSyntheticEvent, TextInputChangeEventData, ImageBackground, Image, Text } from 'react-native';
+          NativeSyntheticEvent, TextInputChangeEventData, ImageBackground, Image, Text, Modal } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import AsyncGetItem from '../AsyncGetItem'
 import axios from 'axios';
@@ -63,8 +63,9 @@ export default function ChurchMain(props : any) {
       const data = await AsyncGetItem();
       setAsyncGetData(data);
       if (data?.userChurchKey) {
-        fetchPosts(data?.userChurchKey);
-        fetchChurchNotice(data?.userChurchKey);
+        const copy = JSON.parse(data.userChurchKey);
+        fetchPosts(copy);
+        fetchChurchNotice(copy);
         CheckMyAuth(data?.userAccount);
       }
     } catch (error) {
@@ -149,6 +150,7 @@ export default function ChurchMain(props : any) {
     });
   }; 
 
+
   const renderPreview = (content : string) => {
     if (content?.length > 30) {
       return content.substring(0, 30) + '...';
@@ -157,11 +159,19 @@ export default function ChurchMain(props : any) {
   };
 
 
-  const alertImageRevise = () => { 
-    Alert.alert('사진을 변경하시겠습니까?', '교회사진 변경은 버튼은 목회자(담임)에게만 노출됩니다.', [
+  const alertProfileRevise = () => { 
+    Alert.alert('교회 정보를 변경하시겠습니까?', '이 버튼은 목회자(담임)에게만 노출됩니다.', [
       { text: '취소', onPress: () => { return }},
       { text: '확인', onPress: () => 
-       {church?.id === 11 ? Alert.alert('테스트입니다.') : props.navigation.navigate("ChurchImageRevise", {data : church, userAccount: asyncGetData.userAccount})} }
+       { church?.id === 11 ? Alert.alert('테스트입니다.') : props.navigation.navigate("ChurchProfileRevise", {data : church, userAccount: asyncGetData.userAccount})} }
+    ]);
+  }
+
+  const alertImageRevise = () => { 
+    Alert.alert('사진을 변경하시겠습니까?', '이 버튼은 목회자(담임)에게만 노출됩니다.', [
+      { text: '취소', onPress: () => { return }},
+      { text: '확인', onPress: () => 
+       { church?.id === 11 ? Alert.alert('테스트입니다.') : props.navigation.navigate("ChurchImageRevise", {data : church, userAccount: asyncGetData.userAccount})} }
     ]);
   }
 
@@ -178,6 +188,7 @@ export default function ChurchMain(props : any) {
       { text: '나가기', onPress: () => handleChurchLeave() }
     ]);
   }
+
   // 앱 링크 함수
   const handleAppLink = async () => {
     Clipboard.setString('https://churchbooklet.page.link/WGAX')
@@ -216,7 +227,7 @@ export default function ChurchMain(props : any) {
                   <TouchableOpacity 
                     hitSlop={{ top: 15, bottom: 15 }}
                     onPress={()=>{
-                      props.navigation.navigate("Notice")
+                      props.navigation.navigate("Navi_Notifi", {screen : "AppNoticePastor"})
                     }}
                   >
                     <View style={{padding:10, borderWidth:1, borderColor:'#F15F5F', borderRadius:10}}>
@@ -233,14 +244,25 @@ export default function ChurchMain(props : any) {
               </View> 
               <View style={{height:80, alignItems:'center', justifyContent:'center', marginBottom:10}}>
                 <Typography fontSize={22} fontWeightIdx={0} marginBottom={10}>{church.churchName}</Typography>
-                <View style={{flexDirection:'row', alignItems:'center'}}>
-                <Image
-                  source={{uri: `${MainImageURL}/images/app/${church.religiousbody}.jpg`}}
-                  style={{width:20, height:20, resizeMode:'contain', marginRight:5}}>
-                </Image>
-                <Typography color='#8C8C8C'>{church.religiousbody}</Typography>
+                  <View style={{flexDirection:'row', alignItems:'center'}}>
+                  <Image
+                    source={{uri: `${MainImageURL}/images/app/${church.religiousbody}.jpg`}}
+                    style={{width:20, height:20, resizeMode:'contain', marginRight:5}}>
+                  </Image>
+                  <Typography color='#8C8C8C'>{church.religiousbody}</Typography>
+                </View>
+                {
+                  asyncGetData.userAccount === church.userAccount && 
+                  <TouchableOpacity 
+                    style={{position:'absolute', right:25}}
+                    hitSlop={{ top: 15, bottom: 15 }}
+                    onPress={alertProfileRevise}
+                  >
+                    <AntDesign name='setting' size={20} color='#000'/>
+                  </TouchableOpacity>
+                }
               </View>
-              </View>
+
               <TextBox name='지역' text={`${church.churchAddressCity} ${church.churchAddressCounty}`}/>
               <TextBox name='주소' text={`${church.churchAddressRest}`}/>
               <View style={{flexDirection:'row', alignItems:'center', paddingHorizontal:20, marginVertical:10}}>
@@ -258,7 +280,6 @@ export default function ChurchMain(props : any) {
               <TextBox name='담임목사' text={`${church.churchPastor} 목사`}/>
 
               <View style={[styles.section, {alignItems:'center'}]}>
-                
                 {
                   asyncGetData.userAccount === church.userAccount &&
                   <TouchableOpacity style={{position:'absolute', top: -20, right:10, padding:15}}
@@ -380,7 +401,9 @@ export default function ChurchMain(props : any) {
               <View style={{flexDirection:'row', alignItems:'center', justifyContent:'flex-end', marginBottom:5}}>
                 <TouchableOpacity 
                   style={{padding:5, borderBottomWidth:1, borderBottomColor:'#8C8C8C'}}
-                  onPress={alertChurchLeave }
+                  onPress={()=>{ asyncGetData.userAccount === church.userAccount 
+                                ? Alert.alert('담당 목회자는 교회를 나갈 수 없습니다. 운영진에게 연락주시기 바랍니다.') 
+                                : alertChurchLeave();}}
                 >
                   <Typography fontSize={12}  color='#8C8C8C'>교회 나가기</Typography>
                 </TouchableOpacity>

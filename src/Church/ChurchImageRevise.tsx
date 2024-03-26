@@ -101,7 +101,6 @@ export default function ChurchImageRevise (props : any) {
         },
         params: getParams,
       }).then((res) => {
-        console.log(res.data);
         if (res.data === true) {
           Alert.alert('변경되었습니다!');
         } else {
@@ -120,7 +119,7 @@ export default function ChurchImageRevise (props : any) {
     <View style={styles.container}>
      
       {/* title */}
-      <Title title='교회 사진 수정하기' enTitle=''/>
+      <SubTitle title='교회 사진 수정하기' navigation={props.navigation}/>
                 
       <Divider height={2} />
 

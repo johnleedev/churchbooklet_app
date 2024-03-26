@@ -49,11 +49,11 @@ export default function RegisterBoard (props : any) {
     <View style={styles.container}>
       <Title title='새로 등록된 교회' enTitle='New'/>
       <View style={{paddingHorizontal:20, width:'100%', flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
-        <Typography fontSize={12} color='#8C8C8C'>최근 5개 까지만 보여집니다.</Typography>
+        <Typography fontSize={12} color='#8C8C8C'>최근 10개 까지만 보여집니다.</Typography>
       </View>
       <View style={styles.section}>
         {
-          churchs.slice(0,5).map((item:any, index:any)=>{
+          churchs.slice(0,10).map((item:any, index:any)=>{
 
             return (
               <TouchableOpacity
@@ -67,7 +67,7 @@ export default function RegisterBoard (props : any) {
                 <View style={{flexDirection:'row', alignItems:'center', marginBottom:15}}>
                   <View style={{width:'90%', flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
                     <Typography fontWeightIdx={1} fontSize={18}>{item.churchName}</Typography>
-                    <View style={{}}>
+                    <View style={{alignItems:'flex-end'}}>
                       <Typography fontSize={14} color='#8C8C8C'>{item.religiousbody}</Typography>
                       <Typography fontSize={14} color='#8C8C8C'>{item.churchAddressCity} {item.churchAddressCounty}</Typography>
                     </View>
